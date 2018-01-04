@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 setup(
     name='dutsso',
-    version="0.1.1",
+    version="0.1.",
     description=(
         'A package which can make you login via DUT SSO system by web crawler.'
     ),
@@ -9,7 +9,7 @@ setup(
     author='yuanyuanzijin',
     author_email='yuanyuanzijin@gmail.com',
     license='BSD License',
-    packages=["dutsso.py", "des.js"],
+    packages=["dutsso"],
     platforms=["all"],
     url='https://github.com/yuanyuanzijin/dutsso',
     classifiers=[
