@@ -2,40 +2,27 @@
 python-dutsso
 ===============================================
 
-Dutsso is a package which can make you login via DUT SSO system by web crawler.
+Dutsso是一个可以使你登录大连理工大学统一身份认证系统的一个python包，是本人在写网络爬虫的过程中总结出来的。由于服务器认证方式可能发生变化，所以请在无法使用时及时告知于我，我会及时做出更新。本人邮箱：yuanyuanzijin@gamil.com。
 
-Installation
+安装
 ================
 
-So before you use, please run the code below in the root directory.
+在终端输入
 
 ``pip install git+https://github.com/yuanyuanzijin/python-dutsso`` 
 
-for installing and updating the newest version.
+即可安装dutsso的最新版本。
 
-Since this project is in a period of rapid development, please confirm the current version of your package when using this project. We recommend that you update your package when you see new changes in this repo.
+由于这是一个新项目，且服务器认证方式可能发生变化，请在使用前检查最新版本，以获得更好的使用体验，
 
-Usage
+使用
 =============
 
-The document will be written soon. Before it has been written, please refer the examples in the projects folder.
-
-The project folder contains several examlpes of using this python package. For specific instructions, see the various folders. Each folder is a script project.
-
-Description
-================
-
-Brief introductions.
-
--------------
-
-Some methods of processing the file. You can use
-
-``import dutsso``
-
-to import dutsso module.
+请在程序的开头使用``import dutsso``来引入dutsso。
 
 * class dutsso.User
 
 User类
+
+文档持续更新中。
 
