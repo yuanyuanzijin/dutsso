@@ -9,7 +9,7 @@ setup(
     author='yuanyuanzijin',
     author_email='yuanyuanzijin@gmail.com',
     license='BSD License',
-    packages=find_packages(),
+    py_modules=['dutsso'],
     platforms=["all"],
     url='https://github.com/yuanyuanzijin/dutsso',
     classifiers=[
