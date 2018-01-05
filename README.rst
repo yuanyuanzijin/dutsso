@@ -32,15 +32,18 @@ User对象初始化方法，在创建对象时自动调用，可传入用户名�
 
 示例：
 
-u = dutsso.User()
+::
 
-u.username = "123456"
+    u = dutsso.User()
 
-u.password = "000000"
+    u.username = "123456"
 
-或
+    u.password = "000000"
 
-u = dutsso.User("123456", "000000")
+    或
+
+    u = dutsso.User("123456", "000000")
+
 
 User.login(self, try_cookies=True, auto_save=True)
 -------------
@@ -55,7 +58,10 @@ auto_save参数代表是否在登录成功后保存cookies信息到文件中，�
 
 示例：
 
-back = u.login(try_cookies=True, auto_save=True)
+::
+
+    back = u.login(try_cookies=True, auto_save=True)
+
 
 User.get_card(self)
 -------------
@@ -66,7 +72,10 @@ User.get_card(self)
 
 示例：
 
-card = u.get_card()
+::
+
+    card = u.get_card()
+
 
 User.get_score(self)
 -------------
@@ -77,7 +86,10 @@ User.get_score(self)
 
 示例：
 
-scores = u.get_score()
+::
+
+    scores = u.get_score()
+
 
 User.get_library(self)
 ------------
@@ -88,7 +100,10 @@ User.get_library(self)
 
 示例：
 
-lib_list = u.get_library()
+::
+
+    lib_list = u.get_library()
+
 
 User.logout(self, clear_save=False, path="./")
 --------------
@@ -115,5 +130,6 @@ User.cookies_restore(self, path='./')
 
 手动从文件中恢复cookies值给当前用户的方法。
 
-文档持续更新中，请参考[example.py](https://github.com/yuanyuanzijin/python-dutsso/blob/master/example.py)。
+
+文档持续更新中，请参考https://github.com/yuanyuanzijin/python-dutsso/blob/master/example.py。
 
