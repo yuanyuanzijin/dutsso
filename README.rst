@@ -130,6 +130,32 @@ User.cookies_restore(self, path='./')
 
 手动从文件中恢复cookies值给当前用户的方法。
 
+衍生项目
+==============
 
-文档持续更新中，请参考https://github.com/yuanyuanzijin/python-dutsso/blob/master/example.py。
+- Score_Send_Email
+
+定时查询成绩，获取到新成绩后，发送邮件提醒。详见本人项目`Python-Zijinlib/projects/score_send_email/`_。
+
+.._`Python-Zijinlib/projects/score_send_email/`: https://github.com/yuanyuanzijin/python-zijinlib/tree/master/projects/score_send_email
+
+- Score_yzm
+
+大连理工大学研究生成绩查询，未使用SSO，需要验证码。详见本人项目`Web-Crawler/score/`_。
+
+.._`Web-Crawler/score/`: https://github.com/yuanyuanzijin/web-crawler/blob/master/score
+
+- Score-Crawler
+
+东北大学研究生成绩查询，可跳过验证码。详见Onionwyl的项目`Score-Crawler`_。
+
+.._Score-Crawler`: https://github.com/onionwyl/score-crawler
+
+其他
+==============
+
+文档持续更新中，使用方式请参考Example.py_。
+
+
+.._Example.py: https://github.com/yuanyuanzijin/python-dutsso/blob/master/example.py
 
