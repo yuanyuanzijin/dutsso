@@ -25,22 +25,40 @@ Dutsso是一个可以使你登录大连理工大学统一身份认证系统的�
 文档
 =============
 
-User类
+User.__init__(self, username='', password='')
 -------------
 
-* User.login(self, username, password)
-
-用户登录的方法。请在使用其他方法前调用此方法，已取得登录状态。
-
-返回布尔值，True代表登录成功，False代表登录失败。
+User对象初始化方法，在创建对象时自动调用，可传入用户名和密码（或稍后设置）。
 
 示例：
 
 u = dutsso.User()
 
-back = u.login(username, password)
+u.username = "123456"
 
-* User.get_card(self)
+u.password = "000000"
+
+或
+
+u = dutsso.User("123456", "000000")
+
+User.login(self, try_cookies=True, auto_save=True)
+-------------
+
+用户登录的方法。请在使用其他方法前调用此方法，以取得登录状态。
+
+try_cookies参数代表是否尝试从cookies文件中恢复登录状态，默认为True。
+
+auto_save参数代表是否在登录成功后保存cookies信息到文件中，以方便下次登录，默认为True。
+
+返回布尔值，True代表登录成功，False代表登录失败。
+
+示例：
+
+back = u.login(try_cookies=True, auto_save=True)
+
+User.get_card(self)
+-------------
 
 获取校园卡信息的方法。
 
@@ -50,7 +68,8 @@ back = u.login(username, password)
 
 card = u.get_card()
 
-* User.get_score(self)
+User.get_score(self)
+-------------
 
 获取研究生成绩的方法。
 
@@ -58,9 +77,10 @@ card = u.get_card()
 
 示例：
 
-score = u.get_score()
+scores = u.get_score()
 
-* User.get_library(self)
+User.get_library(self)
+------------
 
 获取图书馆借书信息的方法。
 
@@ -68,7 +88,32 @@ score = u.get_score()
 
 示例：
 
-score = u.get_library()
+lib_list = u.get_library()
 
-文档持续更新中，请参考example.py。
+User.logout(self, clear_save=False, path="./")
+--------------
+
+退出登录的方法，可清除当前cookies。clear_save参数为是否清除保存cookies的文件，默认为False。
+
+User.cookies_get(self)
+--------------
+
+手动获取当前cookies的方法。
+
+User.cookies_save(self, cookies_dict=None, path="./")
+---------------
+
+手动保存当前cookies字典到文件中的方法。
+
+User.cookies_set(self, cookies_dict)
+--------------
+
+手动从字典中设置新cookies的方法。
+
+User.cookies_restore(self, path='./')
+--------------
+
+手动从文件中恢复cookies值给当前用户的方法。
+
+文档持续更新中，请参考[example.py](https://github.com/yuanyuanzijin/python-dutsso/blob/master/example.py)。
 

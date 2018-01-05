@@ -1,51 +1,89 @@
+import os, json
 import requests
 from bs4 import BeautifulSoup
 import execjs
 
 class User:
-    def __init__(self):
+    def __init__(self, username='', password=''):
+        self.username = username
+        self.password = password
         self.s = requests.Session()
     
     def __get_key(self, username, password, ticket):  
         ctx = execjs.compile(htmlstr)
         rsa = ctx.call('strEnc',username+password+ticket, '1', '2', '3')
         return rsa
+      
+    def cookies_get(self):
+        cookies_dict = requests.utils.dict_from_cookiejar(self.s.cookies)
+        return cookies_dict
+
+    def cookies_save(self, cookies_dict=None, path="./"):
+        if not cookies_dict:
+            cookies_dict = self.cookies_get()
+        filename = os.path.join(path, "cookies_dutsso_"+self.username+".coo")
+        with open(filename, mode='w', encoding="utf-8") as f:
+            f.write(json.dumps(cookies_dict))
+        return True
+
+    def cookies_set(self, cookies_dict):
+        self.s.cookies.set('JSESSIONID', cookies_dict["JSESSIONID"], path="/", domain="sso.dlut.edu.cn")
+        self.s.cookies.set('CASTGC', cookies_dict["CASTGC"], path="/cas/", domain="sso.dlut.edu.cn")
+        return True
+
+    def cookies_restore(self, path='./'):
+        filename = os.path.join(path, "cookies_dutsso_"+self.username+".coo")
+        if os.path.exists(filename):
+            with open(filename, mode='r', encoding="utf-8") as f:
+                cookies_dict = f.readline()
+            self.cookies_set(json.loads(cookies_dict))
+            return True
+        else:
+            return False
     
-    def login(self, username, password):
-        self.username = username
-        self.password = password
+    def login(self, try_cookies=True, auto_save=True):
+        if try_cookies:
+            result = self.cookies_restore()
+            if result:
+                print("已从cookies中恢复登录状态！")
+                return True
+            else:
+                print("正在登录...")
 
         url = "https://sso.dlut.edu.cn/cas/login?service=http://portal.dlut.edu.cn/tp/"
-        req = self.s.get(url, allow_redirects=False)
+        req = self.s.get(url, allow_redirects=False, timeout=30)
         soup = BeautifulSoup(req.text, 'html.parser')
 
         ticket = soup.select('#lt')[0]['value']
         execution = soup.select('input')[4]['value']
-        rsa = self.__get_key(username, password, ticket)
+        rsa = self.__get_key(self.username, self.password, ticket)
         jsessionid = req.cookies['JSESSIONID']
 
         url2 = "https://sso.dlut.edu.cn/cas/login;jsessionid=%s?service=http://portal.dlut.edu.cn/tp/" % jsessionid
 
         data = {
             'rsa': rsa,
-            'ul': len(username),
-            'pl': len(password),
+            'ul': len(self.username),
+            'pl': len(self.password),
             'lt': ticket,
             'execution': execution,
             '_eventId': 'submit'
         }
 
-        req = self.s.post(url2, data=data, allow_redirects=False)
+        req = self.s.post(url2, data=data, allow_redirects=False, timeout=30)
         soup = BeautifulSoup(req.text, 'html.parser')
         newaddr = soup.select('a')[0]['href']
         if newaddr.find("javascript") < 0:
+            if auto_save:
+                self.cookies_save()
+                print("已自动保存登录信息！")
             return True
         else:
             return False
 
     def get_card(self):
         url_card = "http://202.118.64.15/fabu/sso_jump.jsp"
-        req = self.s.get(url_card)
+        req = self.s.get(url_card, timeout=30)
         soup = BeautifulSoup(req.text, 'html.parser')
         money = soup.select('#information td')[5].text.strip().strip("元")
         last_time = soup.select('#information td')[7].text.strip()
@@ -56,8 +94,8 @@ class User:
         return info
 
     def get_score(self):
-        req = self.s.get("https://sso.dlut.edu.cn/cas/login?service=http://202.118.65.123/gmis/LoginCAS.aspx")
-        req = self.s.get('http://202.118.65.123/pyxx/grgl/xskccjcx.aspx?xh=%s' % self.username)
+        req = self.s.get("https://sso.dlut.edu.cn/cas/login?service=http://202.118.65.123/gmis/LoginCAS.aspx", timeout=30)
+        req = self.s.get('http://202.118.65.123/pyxx/grgl/xskccjcx.aspx?xh=%s' % self.username, timeout=30)
         soup = BeautifulSoup(req.text, 'html.parser')
 
         bx_scores = soup.select('#MainWork_dgData tr')[1:]
@@ -83,8 +121,8 @@ class User:
         return scores
 
     def get_library(self):
-        url_card = "http://portal.dlut.edu.cn/sso/sso_tsg.jsp"
-        req = self.s.get(url_card)
+        url = "http://portal.dlut.edu.cn/sso/sso_tsg.jsp"
+        req = self.s.get(url, timeout=30)
         soup = BeautifulSoup(req.text, "html.parser")
         time = soup.select('form input')[1]['value']
         verify = soup.select('form input')[2]['value']
@@ -95,10 +133,10 @@ class User:
             'time': time,
             'verify': verify
         }
-        req = self.s.post(url_lib_login, data=data, allow_redirects=False)
+        req = self.s.post(url_lib_login, data=data, allow_redirects=False, timeout=30)
         
         url_lib_info = "http://opac.lib.dlut.edu.cn/reader/redr_info_rule.php"
-        req = self.s.get(url_lib_info)
+        req = self.s.get(url_lib_info, timeout=30)
         soup = BeautifulSoup(req.content.decode('utf-8'), 'html.parser')
         myinfo = soup.select('#mylib_content table tr')
         borrow_times = myinfo[3].select('td')[2].text.strip("累计借书：").strip("册次")
@@ -114,6 +152,31 @@ class User:
             "phone": bind_phone
         }
         return lib_dict
+
+    def logout(self, clear_save=False, path="./"):
+        self.s.cookies.clear()
+        if clear_save:
+            filename = os.path.join(path, "cookies_dutsso_"+self.username+".coo")
+            if os.path.exists(filename):
+                os.remove(filename)
+                return
+        return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 htmlstr = '''
