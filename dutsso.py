@@ -45,10 +45,13 @@ class User:
         if try_cookies:
             result = self.cookies_restore()
             if result:
-                print("已从cookies中恢复登录状态！")
-                return True
-            else:
-                print("正在登录...")
+                print("尝试从Cookies中恢复登录状态...")
+                if self.isactive():
+                    print("已恢复登录状态！")
+                    return True
+                else:
+                    print("Cookies登录状态已失效！")
+        print("正在使用用户名密码登录...")
 
         url = "https://sso.dlut.edu.cn/cas/login?service=http://portal.dlut.edu.cn/tp/"
         req = self.s.get(url, allow_redirects=False, timeout=30)
@@ -57,7 +60,7 @@ class User:
         ticket = soup.select('#lt')[0]['value']
         execution = soup.select('input')[4]['value']
         rsa = self.__get_key(self.username, self.password, ticket)
-        jsessionid = req.cookies['JSESSIONID']
+        jsessionid = self.s.cookies['JSESSIONID']
 
         url2 = "https://sso.dlut.edu.cn/cas/login;jsessionid=%s?service=http://portal.dlut.edu.cn/tp/" % jsessionid
 
@@ -161,6 +164,13 @@ class User:
                 os.remove(filename)
                 return
         return
+
+    def isactive(self):
+        req = self.s.get("https://sso.dlut.edu.cn/cas/login?service=http%3A%2F%2Fportal.dlut.edu.cn%2Ftp%2F", allow_redirects=False)
+        if req.status_code == 302:
+            return True
+        else:
+            return False
 
 
 

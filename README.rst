@@ -126,6 +126,16 @@ User.get_library(self)
 
     lib_list = u.get_library()
 
+User.isactive(self)
+--------------
+
+检测登录状态的方法，返回Bool值。在获取信息前进行登录状态的判断可以增强爬虫的健壮性。
+
+示例：
+
+::
+
+    status = u.isactive()
 
 User.logout(self, clear_save=False, path="./")
 --------------
