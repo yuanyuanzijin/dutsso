@@ -41,7 +41,7 @@ Dutsso是一个可以使你登录大连理工大学统一身份认证系统的�
 
 东北大学研究生成绩查询，可跳过验证码。详见Onionwyl的项目 `Score-Crawler`_ 。
 
-.. _Score-Crawler`: https://github.com/onionwyl/score-crawler
+.. _`Score-Crawler`: https://github.com/onionwyl/score-crawler
 
 
 文档
