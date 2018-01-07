@@ -1,4 +1,4 @@
-import os, json
+import os, json, re
 import requests
 from bs4 import BeautifulSoup
 import execjs
@@ -7,6 +7,7 @@ class User:
     def __init__(self, username='', password=''):
         self.username = username
         self.password = password
+        self.name = ""
         self.s = requests.Session()
     
     def __get_key(self, username, password, ticket):  
@@ -27,7 +28,6 @@ class User:
         return True
 
     def cookies_set(self, cookies_dict):
-        self.s.cookies.set('JSESSIONID', cookies_dict["JSESSIONID"], path="/", domain="sso.dlut.edu.cn")
         self.s.cookies.set('CASTGC', cookies_dict["CASTGC"], path="/cas/", domain="sso.dlut.edu.cn")
         return True
 
@@ -47,6 +47,8 @@ class User:
             if result:
                 print("尝试从Cookies中恢复登录状态...")
                 if self.isactive():
+                    self.name = self.get_info()['name']
+                    self.type = self.get_info()['type']
                     print("已恢复登录状态！")
                     return True
                 else:
@@ -63,7 +65,6 @@ class User:
         jsessionid = self.s.cookies['JSESSIONID']
 
         url2 = "https://sso.dlut.edu.cn/cas/login;jsessionid=%s?service=http://portal.dlut.edu.cn/tp/" % jsessionid
-
         data = {
             'rsa': rsa,
             'ul': len(self.username),
@@ -72,17 +73,66 @@ class User:
             'execution': execution,
             '_eventId': 'submit'
         }
-
-        req = self.s.post(url2, data=data, allow_redirects=False, timeout=30)
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'            
+        }
+        req = self.s.post(url2, data=data, headers=headers, allow_redirects=False, timeout=30)
         soup = BeautifulSoup(req.text, 'html.parser')
         newaddr = soup.select('a')[0]['href']
         if newaddr.find("javascript") < 0:
+            self.name = self.get_info()['name']
+            self.type = self.get_info()['type']
             if auto_save:
                 self.cookies_save()
                 print("已自动保存登录信息！")
             return True
         else:
             return False
+    
+    def get_info(self):
+        req = self.s.get('http://portal.dlut.edu.cn/tp/view?m=up')
+        soup = BeautifulSoup(req.text, "html.parser")
+        name = soup.select('#user-btn-01 span')[0].text
+        url_info = 'http://portal.dlut.edu.cn/tp/sys/uacm/profile/getUserType'
+        data = {}
+        headers = {
+            'Content-Type': 'application/json;charset=UTF-8',
+            'Origin': 'http://portal.dlut.edu.cn',
+            'Referer': 'http://portal.dlut.edu.cn/tp/view?m=up',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'
+        }
+        req = self.s.post(url_info, data=json.dumps(data), headers=headers)
+        info_dict = json.loads(req.text)[0]
+        info = {
+            'type': info_dict['CODENAME'],
+            'name': name
+        }
+        return info
+
+    def get_all_info(self):
+        req = self.s.get('http://portal.dlut.edu.cn/tp/view?m=up')
+        url_info = 'http://portal.dlut.edu.cn/tp/sys/uacm/profile/getUserById'
+        data = {
+            "ID_NUMBER": self.username
+        }
+        headers = {
+            'Content-Type': 'application/json;charset=UTF-8',
+            'Origin': 'http://portal.dlut.edu.cn',
+            'Referer': 'http://portal.dlut.edu.cn/tp/view?m=up',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'
+        }
+        req = self.s.post(url_info, data=json.dumps(data), headers=headers)
+        info_dict = json.loads(req.text)
+        info = {
+            'name': info_dict['USER_NAME'],
+            'type': info_dict['ID_TYPE'],
+            'depart': info_dict['UNIT_NAME'],
+            'sex': info_dict['USER_SEX'],
+            'home': info_dict['NATIVE_PLACE'],
+            'mobile': info_dict['MOBILE'],
+            'email': info_dict['EMAIL']
+        }
+        return info
 
     def get_card(self):
         url_card = "http://202.118.64.15/fabu/sso_jump.jsp"
@@ -93,6 +143,35 @@ class User:
         info = {
             "money": money,
             "last_time": last_time
+        }
+        return info
+    
+    def get_bathroom(self):
+        url_bathroom = "http://202.118.64.15/fabu/cardUserManager.do?method=queryTboxCount"
+        req = self.s.get(url_bathroom, timeout=30)
+        soup = BeautifulSoup(req.text, "html.parser")
+        td = soup.select('.title tr td font')
+        info = {
+            'bs0': {
+                'total': int(re.sub("\D", "", str(td[0]))),
+                'use': int(re.sub("\D", "", str(td[1]))),
+                'unuse': int(re.sub("\D", "", str(td[2])))  
+            },
+            'bs1': {
+                'total': int(re.sub("\D", "", str(td[3]))),
+                'use': int(re.sub("\D", "", str(td[4]))),
+                'unuse': int(re.sub("\D", "", str(td[5])))
+            },
+            'xs0': {
+                'total': int(re.sub("\D", "", str(td[6]))),
+                'use': int(re.sub("\D", "", str(td[7]))),
+                'unuse': int(re.sub("\D", "", str(td[8])))
+            },
+            'xs1': {
+                'total': int(re.sub("\D", "", str(td[9]))),
+                'use': int(re.sub("\D", "", str(td[10]))),
+                'unuse': int(re.sub("\D", "", str(td[11])))
+            },
         }
         return info
 
@@ -166,7 +245,7 @@ class User:
         return
 
     def isactive(self):
-        req = self.s.get("https://sso.dlut.edu.cn/cas/login?service=http%3A%2F%2Fportal.dlut.edu.cn%2Ftp%2F", allow_redirects=False)
+        req = self.s.get("https://sso.dlut.edu.cn/cas/login?service=http%3A%2F%2Fportal.dlut.edu.cn%2Ftp%2F", allow_redirects=False, timeout=30)
         if req.status_code == 302:
             return True
         else:

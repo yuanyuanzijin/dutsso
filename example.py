@@ -1,5 +1,6 @@
 import getpass
 import dutsso
+from bs4 import BeautifulSoup
 
 print('\n********** 欢迎使用大连理工大学校园门户信息查询系统 **********')
 print('******************** Powered by Zijin ********************')
@@ -12,34 +13,45 @@ login = u.login()
 if not login:
     print("用户名密码错误！")
 else:
-    print("登录成功！")
+    print("%s（%s）登录成功！" % (u.name, u.type))
 
-    # 查询校园卡余额
-    if u.isactive():
-        card = u.get_card()
-        print("\n您的校园卡信息为：")
-        print("余额：%s元" % card["money"])
-        print("最后交易时间：%s" % card["last_time"])
+    user_info = u.get_all_info()
+    print(user_info)
 
-    # 查询研究生成绩
-    if u.isactive():
-        scores = u.get_score()
-        print("\n您的研究生成绩信息为：")
-        print('共找到%d条必修课成绩' % len(scores["bx"]))
-        for i in scores["bx"].keys():
-            print(i, scores["bx"][i])
-        print('\n共找到%d条选修课成绩' % len(scores["xx"]))
-        for i in scores["xx"].keys():
-            print(i, scores["xx"][i])
+    # # 查询校园卡余额
+    # if u.isactive():
+    #     card = u.get_card()
+    #     print("\n您的校园卡信息为：")
+    #     print("余额：%s元" % card["money"])
+    #     print("最后交易时间：%s" % card["last_time"])
 
-    # 查询图书馆
+    # 查询浴室信息
     if u.isactive():
-        lib_dict = u.get_library()
-        print("\n您的图书馆信息为：")
-        print("总借书次数：%s" % lib_dict['times'])
-        print("欠费金额：%s" % lib_dict['money'])
-        print("绑定邮箱：%s" % lib_dict['email'])
-        print("绑定手机：%s" % lib_dict['phone'])
+        bath = u.get_bathroom()
+        print("\n北山男浴室已使用%d/%d" % (bath['bs0']['use'], bath['bs0']['total']))
+        print("北山女浴室已使用%d/%d" % (bath['bs1']['use'], bath['bs1']['total']))
+        print("西山男浴室已使用%d/%d" % (bath['xs0']['use'], bath['xs0']['total']))
+        print("西山女浴室已使用%d/%d" % (bath['xs1']['use'], bath['xs1']['total']))
+
+    # # 查询研究生成绩
+    # if u.isactive():
+    #     scores = u.get_score()
+    #     print("\n您的研究生成绩信息为：")
+    #     print('共找到%d条必修课成绩' % len(scores["bx"]))
+    #     for i in scores["bx"].keys():
+    #         print(i, scores["bx"][i])
+    #     print('\n共找到%d条选修课成绩' % len(scores["xx"]))
+    #     for i in scores["xx"].keys():
+    #         print(i, scores["xx"][i])
+
+    # # 查询图书馆
+    # if u.isactive():
+    #     lib_dict = u.get_library()
+    #     print("\n您的图书馆信息为：")
+    #     print("总借书次数：%s" % lib_dict['times'])
+    #     print("欠费金额：%s" % lib_dict['money'])
+    #     print("绑定邮箱：%s" % lib_dict['email'])
+    #     print("绑定手机：%s" % lib_dict['phone'])
 
 u.logout()
 
