@@ -28,7 +28,10 @@ class User:
         return True
 
     def cookies_set(self, cookies_dict):
+        self.s.cookies.set('JSESSIONID', cookies_dict["JSESSIONID"], path="/", domain="sso.dlut.edu.cn")
+        self.s.cookies.set('whistlekey', cookies_dict["whistlekey"])
         self.s.cookies.set('CASTGC', cookies_dict["CASTGC"], path="/cas/", domain="sso.dlut.edu.cn")
+        self.s.cookies.set('tp', cookies_dict["tp"])        
         return True
 
     def cookies_restore(self, path='./'):
@@ -245,8 +248,8 @@ class User:
         return
 
     def isactive(self):
-        req = self.s.get("https://sso.dlut.edu.cn/cas/login?service=http%3A%2F%2Fportal.dlut.edu.cn%2Ftp%2F", allow_redirects=False, timeout=30)
-        if req.status_code == 302:
+        req = self.s.get("http://portal.dlut.edu.cn/tp/view?m=up", allow_redirects=False, timeout=30)
+        if req.status_code == 200:
             return True
         else:
             return False

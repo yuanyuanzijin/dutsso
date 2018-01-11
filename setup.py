@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 setup(
     name='dutsso',
-    version="0.3.0",
+    version="0.3.1",
     description=(
         'A package which can make you login via DUT SSO system by web crawler.'
     ),
