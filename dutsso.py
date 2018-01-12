@@ -8,6 +8,7 @@ class User:
         self.username = username
         self.password = password
         self.name = ""
+        self.type = ""
         self.s = requests.Session()
     
     def __get_key(self, username, password, ticket):  
@@ -29,9 +30,9 @@ class User:
 
     def cookies_set(self, cookies_dict):
         self.s.cookies.set('JSESSIONID', cookies_dict["JSESSIONID"], path="/", domain="sso.dlut.edu.cn")
-        self.s.cookies.set('whistlekey', cookies_dict["whistlekey"])
+        #self.s.cookies.set('whistlekey', cookies_dict["whistlekey"])
         self.s.cookies.set('CASTGC', cookies_dict["CASTGC"], path="/cas/", domain="sso.dlut.edu.cn")
-        self.s.cookies.set('tp', cookies_dict["tp"])        
+        #self.s.cookies.set('tp', cookies_dict["tp"])        
         return True
 
     def cookies_restore(self, path='./'):
@@ -49,6 +50,8 @@ class User:
             result = self.cookies_restore()
             if result:
                 print("尝试从Cookies中恢复登录状态...")
+                url = "https://sso.dlut.edu.cn/cas/login?service=http://portal.dlut.edu.cn/tp/"
+                req = self.s.get(url, timeout=30)
                 if self.isactive():
                     self.name = self.get_info()['name']
                     self.type = self.get_info()['type']
@@ -56,6 +59,7 @@ class User:
                     return True
                 else:
                     print("Cookies登录状态已失效！")
+                    self.s.cookies.clear()
         print("正在使用用户名密码登录...")
 
         url = "https://sso.dlut.edu.cn/cas/login?service=http://portal.dlut.edu.cn/tp/"
