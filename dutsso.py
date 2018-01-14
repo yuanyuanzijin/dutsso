@@ -183,8 +183,10 @@ class User:
         return info
 
     def get_score(self):
-        req = self.s.get("https://sso.dlut.edu.cn/cas/login?service=http://202.118.65.123/gmis/LoginCAS.aspx", timeout=30)
-        req = self.s.get('http://202.118.65.123/pyxx/grgl/xskccjcx.aspx?xh=%s' % self.username, timeout=30)
+        req = self.s.get('http://202.118.65.123/pyxx/grgl/xskccjcx.aspx?xh=%s' % self.username, timeout=30, allow_redirects=False)
+        if req.status_code == 302:
+            req = self.s.get("https://sso.dlut.edu.cn/cas/login?service=http://202.118.65.123/gmis/LoginCAS.aspx", timeout=30)
+            req = self.s.get('http://202.118.65.123/pyxx/grgl/xskccjcx.aspx?xh=%s' % self.username, timeout=30)
         soup = BeautifulSoup(req.text, 'html.parser')
 
         bx_scores = soup.select('#MainWork_dgData tr')[1:]
@@ -258,8 +260,103 @@ class User:
         else:
             return False
 
+    def get_course(self):
+        url_course = "http://202.118.65.123/pyxx/pygl/pyjhxk.aspx?xh=" + self.username
+        req = self.s.get(url_course, allow_redirects=False)
+        if req.status_code == 302:
+            req = self.s.get("https://sso.dlut.edu.cn/cas/login?service=http://202.118.65.123/gmis/LoginCAS.aspx", timeout=30)
+            req = self.s.get(url_course, allow_redirects=False)
+        soup = BeautifulSoup(req.text, "html.parser")
+        tr_list = soup.select("#MainWork_dgData tr")[1:]
+        course_list = []
+        for tr in tr_list:
+            c_num = tr.select("td")[0].text.strip()
+            c_address = tr.select("td")[1].text.strip()
+            c_id = tr.select("td")[3].text.strip()
+            c_name = tr.select("td")[4].text.strip()
+            c_teacher = tr.select("td")[5].text.strip()
+            c_time = tr.select("td")[6].text.strip()
+            c_score = tr.select("td")[8].text.strip()
+            c_whole = tr.select("td")[9].text.strip()
+            full = tr.select("td")[10].text.strip()
+            if full == "未满":
+                c_enable = True
+            else:
+                c_enable = False
+            c_method = tr.select("td")[11].text.strip()
+            choose = tr.select("td")[12].text.strip()
+            if choose:
+                c_choose = True
+            else:
+                c_choose = False
+            if c_method == "网上":
+                c_action = tr.select("td")[14].select('a')[0]['href'].strip().split("'")[1]
+            else:
+                continue
+            
+            course_info = {
+                'c_num': c_num,
+                'c_address': c_address,
+                'c_id': c_id,
+                'c_name': c_name,
+                'c_teacher': c_teacher,
+                'c_time': c_time,
+                'c_score': c_score,
+                'c_whole': c_whole,
+                'c_enable': c_enable,
+                'c_choose': c_choose,
+                'c_action': c_action
+            }
+            course_list.append(course_info)
+        return course_list
+    
+    def get_course_not_choosed(self):
+        course_list = self.get_course()
+        course_list_not_choosed = []
+        for i in course_list:
+            if not i['c_choose']:
+                course_list_not_choosed.append(i)
+        return course_list_not_choosed
 
-
+    def choose_course(self, course_tr):
+        if course_tr['c_choose']:
+            print("您已选择%s，不需要重复选择" % course_tr['c_name'])
+            return False
+        url_course = "http://202.118.65.123/pyxx/pygl/pyjhxk.aspx?xh=" + self.username
+        req = self.s.get(url_course, allow_redirects=False)
+        if req.status_code == 302:
+            req = self.s.get("https://sso.dlut.edu.cn/cas/login?service=http://202.118.65.123/gmis/LoginCAS.aspx", timeout=30)
+            req = self.s.get(url_course, allow_redirects=False)
+        soup = BeautifulSoup(req.text, "html.parser")
+        __VIEWSTATE = soup.select("#__VIEWSTATE")[0]['value']
+        __VIEWSTATEGENERATOR = soup.select('#__VIEWSTATEGENERATOR')[0]['value']
+        hftermCode = soup.select('#MainWork_hftermCode')[0]['value']
+        __EVENTTARGET = course_tr['c_action']
+        data = {
+            "ctl00$ScriptManager1": "ctl00$MainWork$UpdatePanel|" + __EVENTTARGET,
+            "__EVENTTARGET": __EVENTTARGET,
+            "__EVENTARGUMENT": "",
+            "__VIEWSTATE": __VIEWSTATE,
+            "__VIEWSTATEGENERATOR": __VIEWSTATEGENERATOR,
+            "ctl00$MainWork$hftermCode": hftermCode,
+            "ctl00$MainWork$dropKeyword": 1,
+            "ctl00$MainWork$txtKeyword": "",
+            "__ASYNCPOST": True
+        }
+        headers = {
+            "Referer": url_course,
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36",
+            "X-MicrosoftAjax": "Delta=true",
+            "X-Requested-With": "XMLHttpRequest"
+        }
+        req = self.s.post(url_course, data=data, headers=headers)
+        back = req.text.split("|")[-2].strip()
+        if back.find("成功") >= 0:
+            return True
+        else:
+            print(back)
+        return False
+        
 
 
 
