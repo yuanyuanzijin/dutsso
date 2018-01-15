@@ -1,5 +1,5 @@
 ===============================================
-python-dutsso
+dutsso
 ===============================================
 
 Dutsso是一个可以使你登录大连理工大学统一身份认证系统的一个python包，是本人在写网络爬虫的过程中总结出来的。由于服务器认证方式可能发生变化，所以请在无法使用时及时告知于我，我会及时做出更新。
@@ -11,7 +11,7 @@ Dutsso是一个可以使你登录大连理工大学统一身份认证系统的�
 
 在终端输入
 
-``pip install git+https://github.com/yuanyuanzijin/python-dutsso`` 
+``pip install git+https://github.com/yuanyuanzijin/dutsso`` 
 
 即可安装dutsso的最新版本。
 
@@ -27,9 +27,15 @@ Dutsso是一个可以使你登录大连理工大学统一身份认证系统的�
 
 - Score_Send_Email
 
-定时查询成绩，获取到新成绩后，发送邮件提醒。详见本人项目 `Python-Zijinlib/projects/score_send_email/`_ 。
+定时查询成绩，获取到新成绩后，发送邮件提醒。详见本人项目 `Zijinlib/projects/score_send_email/`_ 。
 
-.. _`Python-Zijinlib/projects/score_send_email/`: https://github.com/yuanyuanzijin/python-zijinlib/tree/master/projects/score_send_email
+.. _`Python-Zijinlib/projects/score_send_email/`: https://github.com/yuanyuanzijin/zijinlib/tree/master/projects/score_send_email
+
+- Choose_Course
+
+大连理工大学研究生选课脚本，定时查询课余量并选课。详见本人项目 `Zijinlib/projects/choose_course`_ 。
+
+.. _`Zijinlib/projects/choose_course`: https://github.com/yuanyuanzijin/zijinlib/tree/master/projects/choose_course
 
 - Score_yzm
 
