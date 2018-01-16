@@ -84,7 +84,7 @@ else:
                 print("\n***检测到未选择课程：%s，课程状态：可选" % i['c_name'])
                 ch = input("是否选课？[y/n]")
                 if (ch == "y" or ch == "Y"):
-                    back = u.choose_course(i, method="cancel")
+                    back = u.choose_course(i, method="choose")
                     if back:
                         print("%s选课成功！" % i['c_name'])
                     else:

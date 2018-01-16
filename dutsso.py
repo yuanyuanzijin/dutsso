@@ -43,22 +43,22 @@ class User:
         else:
             return False
     
-    def login(self, try_cookies=True, auto_save=True):
+    def login(self, try_cookies=True, auto_save=True, show_info=True):
         if try_cookies:
             result = self.cookies_restore()
             if result:
-                print("Info: 尝试从Cookies中恢复登录状态...")
+                iprint("尝试从Cookies中恢复登录状态...", show_info)
                 url = "https://sso.dlut.edu.cn/cas/login?service=http://portal.dlut.edu.cn/tp/"
                 req = self.s.get(url, timeout=30)
                 if self.isactive():
                     self.name = self.get_info()['name']
                     self.type = self.get_info()['type']
-                    print("Info: 已恢复登录状态！")
+                    iprint("已恢复登录状态！", show_info)
                     return True
                 else:
-                    print("Info: Cookies登录状态已失效！")
+                    iprint("Cookies登录状态已失效！", show_info)
                     self.s.cookies.clear()
-        print("Info: 正在使用用户名密码登录...")
+        iprint("正在使用用户名密码登录...", show_info)
 
         url = "https://sso.dlut.edu.cn/cas/login?service=http://portal.dlut.edu.cn/tp/"
         req = self.s.get(url, allow_redirects=False, timeout=30)
@@ -89,7 +89,7 @@ class User:
             self.type = self.get_info()['type']
             if auto_save:
                 self.cookies_save()
-                print("Info: 已自动保存登录信息！")
+                iprint("已自动保存登录信息！", show_info)
             return True
         else:
             return False
@@ -339,17 +339,17 @@ class User:
                 course_list_choosed.append(i)
         return course_list_choosed
 
-    def choose_course(self, course_tr, method="choose"):
+    def choose_course(self, course_tr, method="choose", show_info=True):
         if method == "choose":
             if course_tr['c_choose']:
-                print("Info: 您已选择%s，不需要重复选择" % course_tr['c_name'])
+                iprint("您已选择%s，不需要重复选择" % course_tr['c_name'], show_info)
                 return False
         elif method == "cancel":
             if not course_tr['c_choose']:
-                print("Info: 您没有选择%s，不需要退课" % course_tr['c_name'])
+                iprint("您没有选择%s，不需要退课" % course_tr['c_name'], show_info)
                 return False
         else:
-            print("Info: method参数错误！choose代表选课，cancel代表退课！")
+            iprint("method参数错误！choose代表选课，cancel代表退课！", show_info)
             return False
         url_course = "http://202.118.65.123/pyxx/pygl/pyjhxk.aspx?xh=" + self.username
         req = self.s.get(url_course, allow_redirects=False)
@@ -391,7 +391,7 @@ class User:
         if back.find("成功") >= 0:
             return True
         else:
-            print("Info: " + back)
+            iprint(back, show_info)
         return False
     
     def get_network(self):
@@ -430,7 +430,9 @@ class User:
         }
         return info
 
-    
+def iprint(info, show_info=True):
+    if show_info:
+          print("Info: " + info)
 
 
 
