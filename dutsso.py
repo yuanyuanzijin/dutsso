@@ -30,9 +30,7 @@ class User:
 
     def cookies_set(self, cookies_dict):
         self.s.cookies.set('JSESSIONID', cookies_dict["JSESSIONID"], path="/", domain="sso.dlut.edu.cn")
-        #self.s.cookies.set('whistlekey', cookies_dict["whistlekey"])
         self.s.cookies.set('CASTGC', cookies_dict["CASTGC"], path="/cas/", domain="sso.dlut.edu.cn")
-        #self.s.cookies.set('tp', cookies_dict["tp"])        
         return True
 
     def cookies_restore(self, path='./'):
@@ -49,18 +47,18 @@ class User:
         if try_cookies:
             result = self.cookies_restore()
             if result:
-                print("尝试从Cookies中恢复登录状态...")
+                print("Info: 尝试从Cookies中恢复登录状态...")
                 url = "https://sso.dlut.edu.cn/cas/login?service=http://portal.dlut.edu.cn/tp/"
                 req = self.s.get(url, timeout=30)
                 if self.isactive():
                     self.name = self.get_info()['name']
                     self.type = self.get_info()['type']
-                    print("已恢复登录状态！")
+                    print("Info: 已恢复登录状态！")
                     return True
                 else:
-                    print("Cookies登录状态已失效！")
+                    print("Info: Cookies登录状态已失效！")
                     self.s.cookies.clear()
-        print("正在使用用户名密码登录...")
+        print("Info: 正在使用用户名密码登录...")
 
         url = "https://sso.dlut.edu.cn/cas/login?service=http://portal.dlut.edu.cn/tp/"
         req = self.s.get(url, allow_redirects=False, timeout=30)
@@ -91,7 +89,7 @@ class User:
             self.type = self.get_info()['type']
             if auto_save:
                 self.cookies_save()
-                print("已自动保存登录信息！")
+                print("Info: 已自动保存登录信息！")
             return True
         else:
             return False
@@ -269,7 +267,7 @@ class User:
         soup = BeautifulSoup(req.text, "html.parser")
         tr_list = soup.select("#MainWork_dgData tr")[1:]
         course_list = []
-        for tr in tr_list:
+        for index, tr in enumerate(tr_list):
             c_num = tr.select("td")[0].text.strip()
             c_address = tr.select("td")[1].text.strip()
             c_id = tr.select("td")[3].text.strip()
@@ -280,19 +278,27 @@ class User:
             c_whole = tr.select("td")[9].text.strip()
             full = tr.select("td")[10].text.strip()
             if full == "未满":
-                c_enable = True
+                c_full = False
             else:
-                c_enable = False
-            c_method = tr.select("td")[11].text.strip()
+                c_full = True
+            method = tr.select("td")[11].text.strip()
+            if method != "网上":
+                continue
             choose = tr.select("td")[12].text.strip()
             if choose:
                 c_choose = True
             else:
                 c_choose = False
-            if c_method == "网上":
-                c_action = tr.select("td")[14].select('a')[0]['href'].strip().split("'")[1]
+            pos = index + 2
+            if pos < 10:
+                c_position = '0' + str(pos)
             else:
-                continue
+                c_position = str(pos)
+            action = choose = tr.select("td")[14].text.strip()
+            if action:
+                c_action = True
+            else:
+                c_action = False
             
             course_info = {
                 'c_num': c_num,
@@ -303,24 +309,47 @@ class User:
                 'c_time': c_time,
                 'c_score': c_score,
                 'c_whole': c_whole,
-                'c_enable': c_enable,
+                'c_full': c_full,
                 'c_choose': c_choose,
+                'c_position': c_position,
                 'c_action': c_action
             }
             course_list.append(course_info)
         return course_list
     
-    def get_course_not_choosed(self):
+    def get_course_not_choosed(self, other_classes=False):
         course_list = self.get_course()
         course_list_not_choosed = []
         for i in course_list:
-            if not i['c_choose']:
-                course_list_not_choosed.append(i)
+            # 包括未选的其他班级
+            if other_classes:
+                if not i['c_choose']:
+                    course_list_not_choosed.append(i)
+            # 忽略已选课程的其他班级
+            else:
+                if not i['c_choose'] and i['c_action']:
+                    course_list_not_choosed.append(i)
         return course_list_not_choosed
 
-    def choose_course(self, course_tr):
-        if course_tr['c_choose']:
-            print("您已选择%s，不需要重复选择" % course_tr['c_name'])
+    def get_course_choosed(self):
+        course_list = self.get_course()
+        course_list_choosed = []
+        for i in course_list:
+            if i['c_choose']:
+                course_list_choosed.append(i)
+        return course_list_choosed
+
+    def choose_course(self, course_tr, method="choose"):
+        if method == "choose":
+            if course_tr['c_choose']:
+                print("Info: 您已选择%s，不需要重复选择" % course_tr['c_name'])
+                return False
+        elif method == "cancel":
+            if not course_tr['c_choose']:
+                print("Info: 您没有选择%s，不需要退课" % course_tr['c_name'])
+                return False
+        else:
+            print("Info: method参数错误！choose代表选课，cancel代表退课！")
             return False
         url_course = "http://202.118.65.123/pyxx/pygl/pyjhxk.aspx?xh=" + self.username
         req = self.s.get(url_course, allow_redirects=False)
@@ -331,7 +360,13 @@ class User:
         __VIEWSTATE = soup.select("#__VIEWSTATE")[0]['value']
         __VIEWSTATEGENERATOR = soup.select('#__VIEWSTATEGENERATOR')[0]['value']
         hftermCode = soup.select('#MainWork_hftermCode')[0]['value']
-        __EVENTTARGET = course_tr['c_action']
+        
+        if method == "choose":
+            __EVENTTARGET = "ctl00$MainWork$dgData$ctl%s$Linkbutton2" % course_tr['c_position']
+        elif method == "cancel":
+            __EVENTTARGET = "ctl00$MainWork$dgData$ctl%s$LinkButton1" % course_tr['c_position']
+        else:
+            return False
         data = {
             "ctl00$ScriptManager1": "ctl00$MainWork$UpdatePanel|" + __EVENTTARGET,
             "__EVENTTARGET": __EVENTTARGET,
@@ -350,11 +385,13 @@ class User:
             "X-Requested-With": "XMLHttpRequest"
         }
         req = self.s.post(url_course, data=data, headers=headers)
-        back = req.text.split("|")[-2].strip()
+        back = json.loads(req.text.split("|")[-2])["text"].split("'")
+        if len(back) > 1:
+            back = back[1]
         if back.find("成功") >= 0:
             return True
         else:
-            print(back)
+            print("Info: " + back)
         return False
         
 

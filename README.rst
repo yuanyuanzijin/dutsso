@@ -6,30 +6,15 @@ Dutsso是一个可以使你登录大连理工大学统一身份认证系统的�
 
 本人邮箱：yuanyuanzijin@gmail.com。
 
-安装
-================
 
-在终端输入
-
-``pip install git+https://github.com/yuanyuanzijin/dutsso`` 
-
-即可安装dutsso的最新版本。
-
-由于这是一个新项目，且服务器认证方式可能发生变化，请在使用前检查最新版本，以获得更好的使用体验，
-
-使用
-===========
-
-请在程序的开头使用``import dutsso``来引入dutsso。
-
-衍生项目
+基于或参考DutSSO的项目
 ===========
 
 - Score_Send_Email
 
 定时查询成绩，获取到新成绩后，发送邮件提醒。详见本人项目 `Zijinlib/projects/score_send_email/`_ 。
 
-.. _`Python-Zijinlib/projects/score_send_email/`: https://github.com/yuanyuanzijin/zijinlib/tree/master/projects/score_send_email
+.. _`Zijinlib/projects/score_send_email/`: https://github.com/yuanyuanzijin/zijinlib/tree/master/projects/score_send_email
 
 - Choose_Course
 
@@ -50,6 +35,25 @@ Dutsso是一个可以使你登录大连理工大学统一身份认证系统的�
 .. _`Score-Crawler`: https://github.com/onionwyl/score-crawler
 
 
+安装
+================
+
+环境：Python 3
+
+在终端输入
+
+``pip install git+https://github.com/yuanyuanzijin/dutsso`` 
+
+即可安装dutsso的最新版本。
+
+由于这是一个新项目，且服务器认证方式可能发生变化，请在使用前检查最新版本，以获得更好的使用体验，
+
+
+使用
+===========
+
+请在程序的开头使用``import dutsso``来引入dutsso。
+
 文档
 =============
 
@@ -62,15 +66,15 @@ User对象初始化方法，在创建对象时自动调用，可传入用户名�
 
 ::
 
+    u = dutsso.User("123456", "000000")
+
+    或
+
     u = dutsso.User()
 
     u.username = "123456"
 
-    u.password = "000000"
-
-    或
-
-    u = dutsso.User("123456", "000000")
+    u.password = "000000"    
 
 
 User.login(self, try_cookies=True, auto_save=True)
@@ -90,6 +94,17 @@ auto_save参数代表是否在登录成功后保存cookies信息到文件中，�
 
     back = u.login(try_cookies=True, auto_save=True)
 
+
+User.isactive(self)
+--------------
+
+检测登录状态的方法，返回True或False。在获取信息前进行登录状态的判断可以避免因cookies过期导致程序出错。
+
+示例：
+
+::
+
+    status = u.isactive()
 
 User.get_card(self)
 -------------
@@ -132,16 +147,25 @@ User.get_library(self)
 
     lib_list = u.get_library()
 
-User.isactive(self)
+User.get_course()
 --------------
 
-检测登录状态的方法，返回Bool值。在获取信息前进行登录状态的判断可以增强爬虫的健壮性。
+获取研究生本学期所有课程的方法，返回字典数组。
 
-示例：
+User.get_course_not_choosed(other_classes=False)
+--------------
 
-::
+获取研究生本学期所有未选课程的方法，返回字典数组。other_classes表示是否显示已选课程的其他班次，默认为False。例如，用户已选择周五的中特，当other_classes为True时，则返回结果包括中特的其他班次；当该变量为False或不填时，则不显示中特的其他班级。
 
-    status = u.isactive()
+User.get_course_choosed()
+--------------
+
+获取研究生本学期已选课程的方法，返回字典数组。
+
+User.choose_course(course_tr, method="choose")
+--------------
+
+研究生选课（退课）方法，返回True或False。method代表操作模式，choose代表选课，cancel代表退课，默认为choose。course_tr即为get_course, get_course_choosed, get_course_not_choosed返回结果（字典数组）中的某一个元素（代表一门课）。
 
 User.logout(self, clear_save=False, path="./")
 --------------
