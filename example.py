@@ -32,6 +32,20 @@ else:
         print("余额：%s元" % card["money"])
         print("最后交易时间：%s" % card["last_time"])
 
+    # 获取校园网信息
+    if u.isactive():
+        network = u.get_network()
+        print('\n*****您的校园网信息为：')
+        print("余额：%s元" % network['fee'])
+        print("本月使用流量：%sMB" % network['used'])
+
+    # 获取校园邮箱信息
+    if u.isactive():
+        email = u.get_email()
+        print('\n*****您的校园邮箱信息为：')
+        print("主邮箱：%s" % email['email'])
+        print("未读邮件：%s" % email['unread'])
+
     # 查询浴室信息
     if u.isactive():
         bath = u.get_bathroom()

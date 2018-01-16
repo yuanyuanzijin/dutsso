@@ -393,8 +393,44 @@ class User:
         else:
             print("Info: " + back)
         return False
-        
+    
+    def get_network(self):
+        req = self.s.get('http://portal.dlut.edu.cn/tp/view?m=up')
+        url_info = 'http://portal.dlut.edu.cn/tp/up/subgroup/getTrafficList'
+        data = {}
+        headers = {
+            'Content-Type': 'application/json;charset=UTF-8',
+            'Origin': 'http://portal.dlut.edu.cn',
+            'Referer': 'http://portal.dlut.edu.cn/tp/view?m=up',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'
+        }
+        req = self.s.post(url_info, data=json.dumps(data), headers=headers)
+        info_dict = json.loads(req.text)[0]
+        info = {
+            'fee': info_dict['fee'],
+            'used': info_dict['usedTraffic']
+        }
+        return info
 
+    def get_email(self):
+        req = self.s.get('http://portal.dlut.edu.cn/tp/view?m=up')
+        url_info = 'http://portal.dlut.edu.cn/tp/up/subgroup/getUnReadList'
+        data = {}
+        headers = {
+            'Content-Type': 'application/json;charset=UTF-8',
+            'Origin': 'http://portal.dlut.edu.cn',
+            'Referer': 'http://portal.dlut.edu.cn/tp/view?m=up',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'
+        }
+        req = self.s.post(url_info, data=json.dumps(data), headers=headers)
+        info_dict = json.loads(req.text)
+        info = {
+            'email': info_dict['email'],
+            'unread': info_dict['num']
+        }
+        return info
+
+    
 
 
 

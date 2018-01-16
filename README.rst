@@ -119,6 +119,31 @@ User.get_card(self)
 
     card = u.get_card()
 
+User.get_network(self)
+------------
+
+获取校园网使用信息的方法。
+
+返回Json格式的校园网使用信息，包括余额和本月流量。
+
+示例：
+
+::
+
+    network = u.network()
+
+User.get_email(self)
+------------
+
+获取校园邮箱信息的方法。
+
+返回Json格式的校园邮箱信息，包括主账号地址和未读邮件数。
+
+示例：
+
+::
+
+    email = u.email()
 
 User.get_score(self)
 -------------
@@ -147,22 +172,22 @@ User.get_library(self)
 
     lib_list = u.get_library()
 
-User.get_course()
+User.get_course(self)
 --------------
 
 获取研究生本学期所有课程的方法，返回字典数组。
 
-User.get_course_not_choosed(other_classes=False)
+User.get_course_not_choosed(self, other_classes=False)
 --------------
 
 获取研究生本学期所有未选课程的方法，返回字典数组。other_classes表示是否显示已选课程的其他班次，默认为False。例如，用户已选择周五的中特，当other_classes为True时，则返回结果包括中特的其他班次；当该变量为False或不填时，则不显示中特的其他班级。
 
-User.get_course_choosed()
+User.get_course_choosed(self)
 --------------
 
 获取研究生本学期已选课程的方法，返回字典数组。
 
-User.choose_course(course_tr, method="choose")
+User.choose_course(self, course_tr, method="choose")
 --------------
 
 研究生选课（退课）方法，返回True或False。method代表操作模式，choose代表选课，cancel代表退课，默认为choose。course_tr即为get_course, get_course_choosed, get_course_not_choosed返回结果（字典数组）中的某一个元素（代表一门课）。
