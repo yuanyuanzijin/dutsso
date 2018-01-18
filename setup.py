@@ -26,7 +26,7 @@ setup(
         'Topic :: Software Development :: Libraries'
     ],
     install_requires=[
-        'bs4',
+        'beautifulsoup4',
         'pyexecjs',
         'requests'
     ]

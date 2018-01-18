@@ -83,7 +83,6 @@ class User:
         req = self.s.post(url2, data=data, headers=headers, allow_redirects=False, timeout=30)
         soup = BeautifulSoup(req.text, 'html.parser')
         newaddr = soup.select('a')[0]['href']
-        print(newaddr)
         if newaddr.find("javascript") < 0:
             self.name = self.get_info()['name']
             self.type = self.get_info()['type']
