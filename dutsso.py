@@ -48,8 +48,7 @@ class User:
             result = self.cookies_restore()
             if result:
                 iprint("尝试从Cookies中恢复登录状态...", show_info)
-                url = "https://sso.dlut.edu.cn/cas/login?service=http://portal.dlut.edu.cn/tp/"
-                req = self.s.get(url, timeout=30)
+                req = self.s.get('http://portal.dlut.edu.cn/tp/view?m=up')
                 if self.isactive():
                     self.name = self.get_info()['name']
                     self.type = self.get_info()['type']
@@ -84,6 +83,7 @@ class User:
         req = self.s.post(url2, data=data, headers=headers, allow_redirects=False, timeout=30)
         soup = BeautifulSoup(req.text, 'html.parser')
         newaddr = soup.select('a')[0]['href']
+        print(newaddr)
         if newaddr.find("javascript") < 0:
             self.name = self.get_info()['name']
             self.type = self.get_info()['type']

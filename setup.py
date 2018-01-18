@@ -1,9 +1,9 @@
 from setuptools import setup, find_packages
 setup(
     name='dutsso',
-    version="0.5.0",
+    version="0.5.2",
     description=(
-        'A package which can make you login via DUT SSO system by web crawler.'
+        'A module which can make you log in DUT SSO system by web crawler easily.'
     ),
     long_description=open('README.rst', 'rb').read().decode('utf-8'),
     author='yuanyuanzijin',
@@ -25,4 +25,9 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Topic :: Software Development :: Libraries'
     ],
+    install_requires=[
+        'bs4',
+        'pyexecjs',
+        'requests'
+    ]
 )
