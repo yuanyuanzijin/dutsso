@@ -56,7 +56,8 @@ class User:
                     return True
                 else:
                     iprint("Cookies登录状态已失效！", show_info)
-                    self.s.cookies.clear()
+        
+        self.s.cookies.clear()
         iprint("正在使用用户名密码登录...", show_info)
 
         url = "https://sso.dlut.edu.cn/cas/login?service=http://portal.dlut.edu.cn/tp/"
@@ -179,34 +180,43 @@ class User:
         }
         return info
 
-    def get_score(self):
+    def get_score_yjs(self):
         req = self.s.get('http://202.118.65.123/pyxx/grgl/xskccjcx.aspx?xh=%s' % self.username, timeout=30, allow_redirects=False)
         if req.status_code == 302:
             req = self.s.get("https://sso.dlut.edu.cn/cas/login?service=http://202.118.65.123/gmis/LoginCAS.aspx", timeout=30)
             req = self.s.get('http://202.118.65.123/pyxx/grgl/xskccjcx.aspx?xh=%s' % self.username, timeout=30)
         soup = BeautifulSoup(req.text, 'html.parser')
 
+        score_list = []
+
         bx_scores = soup.select('#MainWork_dgData tr')[1:]
-        bx_dict = {}
         for score in bx_scores:
             soup1 = BeautifulSoup(str(score), 'html.parser')
-            name = soup1.select('td')[0].text
-            value = soup1.select('span')[0].text
-            bx_dict[name] = value
+            c_name = soup1.select('td')[0].text
+            c_score = soup1.select('td')[1].text
+            c_value = soup1.select('span')[0].text
+            c_dict = {
+                'c_name': c_name,
+                'c_value': c_value,
+                'c_score': c_score,
+                'compulsory': True
+            }
+            score_list.append(c_dict)
         
-        xx_dict = {}
         xx_scores = soup.select('#MainWork_Datagrid1 tr')[1:]
         for score in xx_scores:
             soup2 = BeautifulSoup(str(score), 'html.parser')
-            name = soup2.select('td')[0].text
-            value = soup2.select('span')[0].text
-            xx_dict[name] = value
-        
-        scores = {
-            "bx": bx_dict,
-            "xx": xx_dict
-        }
-        return scores
+            c_name = soup2.select('td')[0].text
+            c_score = soup2.select('td')[1].text
+            c_value = soup2.select('span')[0].text
+            c_dict = {
+                'c_name': c_name,
+                'c_score': c_score,
+                'c_value': c_value,
+                'compulsory': False
+            }
+            score_list.append(c_dict)
+        return score_list
 
     def get_library(self):
         url = "http://portal.dlut.edu.cn/sso/sso_tsg.jsp"

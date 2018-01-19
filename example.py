@@ -1,6 +1,7 @@
 import getpass
 import dutsso
 from bs4 import BeautifulSoup
+from prettytable import PrettyTable
 
 print('\n********** 欢迎使用大连理工大学校园门户信息查询系统 **********')
 print('******************** Powered by Zijin ********************')
@@ -57,14 +58,13 @@ else:
 
     # 查询研究生成绩
     if u.isactive():
-        scores = u.get_score()
+        scores = u.get_score_yjs()
         print("\n*****您的研究生成绩信息为：")
-        print('共找到%d条必修课成绩' % len(scores["bx"]))
-        for i in scores["bx"].keys():
-            print(i, scores["bx"][i])
-        print('\n共找到%d条选修课成绩' % len(scores["xx"]))
-        for i in scores["xx"].keys():
-            print(i, scores["xx"][i])
+        x = PrettyTable(["课程名称", "分数", "学分", "课程类型"])
+        for i in scores:
+            x.add_row([i['c_name'], i['c_value'], i['c_score'], "必修" if i['compulsory'] else "选修"])
+        print(x)
+
 
     # 查询图书馆
     if u.isactive():
