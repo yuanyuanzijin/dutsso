@@ -85,8 +85,11 @@ class User:
         soup = BeautifulSoup(req.text, 'html.parser')
         newaddr = soup.select('a')[0]['href']
         if newaddr.find("javascript") < 0:
-            self.name = self.get_info()['name']
-            self.type = self.get_info()['type']
+            try:
+                self.name = self.get_info()['name']
+                self.type = self.get_info()['type']
+            except Exception as e:
+                iprint("信息获取失败！")
             if auto_save:
                 self.cookies_save()
                 iprint("已自动保存登录信息！", show_info)
@@ -101,9 +104,11 @@ class User:
         url_info = 'http://portal.dlut.edu.cn/tp/sys/uacm/profile/getUserType'
         data = {}
         headers = {
+            'Accept': 'application/json, text/javascript, */*; q=0.01',
             'Content-Type': 'application/json;charset=UTF-8',
             'Origin': 'http://portal.dlut.edu.cn',
             'Referer': 'http://portal.dlut.edu.cn/tp/view?m=up',
+            'X-Requested-With': 'XMLHttpRequest',
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'
         }
         req = self.s.post(url_info, data=json.dumps(data), headers=headers)
