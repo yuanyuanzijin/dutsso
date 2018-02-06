@@ -53,13 +53,6 @@ DutSSO是一个可以使你快速登录大连理工大学统一身份认证系�
 功能概述
 ==============
 
-User.login()
-
-#### 概述
-
-用户登录的方法。请在使用其他方法前调用此方法，以取得登录状态。
-
-
 详细使用文档请查看 Document_ 。
 
 .. _Document: https://github.com/yuanyuanzijin/DutSSO/wiki/Document
