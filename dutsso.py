@@ -29,7 +29,9 @@ class User:
         return True
 
     def cookies_set(self, cookies_dict):
-        self.s.cookies.set('JSESSIONID', cookies_dict["JSESSIONID"], path="/", domain="sso.dlut.edu.cn")
+        self.s.cookies.set('JSESSIONID4', cookies_dict["JSESSIONID4"], path="/", domain="portal.dlut.edu.cn")
+        self.s.cookies.set('JSESSIONID', cookies_dict["JSESSIONID"], path="/", domain="res.dlut.edu.cn")
+        self.s.cookies.set('whistlekey', cookies_dict["whistlekey"], path="/", domain=".dlut.edu.cn")
         self.s.cookies.set('CASTGC', cookies_dict["CASTGC"], path="/cas/", domain="sso.dlut.edu.cn")
         return True
 
@@ -412,8 +414,8 @@ class User:
         return False
     
     def get_network(self):
-        req = self.s.get('http://portal.dlut.edu.cn/tp/view?m=up')
-        url_info = 'http://portal.dlut.edu.cn/tp/up/subgroup/getTrafficList'
+        req = self.s.get('https://portal.dlut.edu.cn/tp/view?m=up')
+        url_info = 'https://portal.dlut.edu.cn/tp/up/subgroup/getTrafficList'
         data = {}
         headers = {
             'Content-Type': 'application/json;charset=UTF-8',
@@ -430,8 +432,8 @@ class User:
         return info
 
     def get_email(self):
-        req = self.s.get('http://portal.dlut.edu.cn/tp/view?m=up')
-        url_info = 'http://portal.dlut.edu.cn/tp/up/subgroup/getUnReadList'
+        req = self.s.get('https://portal.dlut.edu.cn/tp/view?m=up')
+        url_info = 'https://portal.dlut.edu.cn/tp/up/subgroup/getUnReadList'
         data = {}
         headers = {
             'Content-Type': 'application/json;charset=UTF-8',
