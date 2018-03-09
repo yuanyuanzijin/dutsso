@@ -148,7 +148,10 @@ class User:
 
     def get_card(self):
         url_card = "http://202.118.64.15/fabu/sso_jump.jsp"
-        req = self.s.get(url_card, timeout=30)
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'            
+        }
+        req = self.s.get(url_card, timeout=30, headers=headers)
         soup = BeautifulSoup(req.text, 'html.parser')
         money = soup.select('#information td')[5].text.strip().strip("元")
         last_time = soup.select('#information td')[7].text.strip()
@@ -188,9 +191,12 @@ class User:
         return info
 
     def get_score_yjs(self):
-        req = self.s.get('http://202.118.65.123/pyxx/grgl/xskccjcx.aspx?xh=%s' % self.username, timeout=30, allow_redirects=False)
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'            
+        }
+        req = self.s.get('http://202.118.65.123/pyxx/grgl/xskccjcx.aspx?xh=%s' % self.username, timeout=30, allow_redirects=False, headers=headers)
         if req.status_code == 302:
-            req = self.s.get("https://sso.dlut.edu.cn/cas/login?service=http://202.118.65.123/gmis/LoginCAS.aspx", timeout=30)
+            req = self.s.get("https://sso.dlut.edu.cn/cas/login?service=http://202.118.65.123/gmis/LoginCAS.aspx", timeout=30, headers=headers)
             req = self.s.get('http://202.118.65.123/pyxx/grgl/xskccjcx.aspx?xh=%s' % self.username, timeout=30)
         soup = BeautifulSoup(req.text, 'html.parser')
 
@@ -201,7 +207,10 @@ class User:
             soup1 = BeautifulSoup(str(score), 'html.parser')
             c_name = soup1.select('td')[0].text
             c_score = soup1.select('td')[1].text
-            c_value = soup1.select('span')[0].text
+            try:
+              c_value = soup1.select('span')[0].text
+            except Exception as e:
+              c_value = "评价后查看"
             c_dict = {
                 'c_name': c_name,
                 'c_value': c_value,
@@ -278,10 +287,13 @@ class User:
             return False
 
     def get_course(self):
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'            
+        }
         url_course = "http://202.118.65.123/pyxx/pygl/pyjhxk.aspx?xh=" + self.username
-        req = self.s.get(url_course, allow_redirects=False)
+        req = self.s.get(url_course, allow_redirects=False, headers=headers)
         if req.status_code == 302:
-            req = self.s.get("https://sso.dlut.edu.cn/cas/login?service=http://202.118.65.123/gmis/LoginCAS.aspx", timeout=30)
+            req = self.s.get("https://sso.dlut.edu.cn/cas/login?service=http://202.118.65.123/gmis/LoginCAS.aspx", timeout=30, headers=headers)
             req = self.s.get(url_course, allow_redirects=False)
         soup = BeautifulSoup(req.text, "html.parser")
         tr_list = soup.select("#MainWork_dgData tr")[1:]
