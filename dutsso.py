@@ -48,7 +48,6 @@ class User:
             result = self.cookies_restore()
             if result:
                 iprint("尝试从Cookies中恢复登录状态...", show_info)
-                req = self.s.get('http://portal.dlut.edu.cn/tp/view?m=up')
                 if self.isactive():
                     self.name = self.get_info()['name']
                     self.type = self.get_info()['type']
@@ -101,7 +100,7 @@ class User:
         req = self.s.get('http://portal.dlut.edu.cn/tp/view?m=up')
         soup = BeautifulSoup(req.text, "html.parser")
         name = soup.select('#user-btn-01 span')[0].text
-        url_info = 'http://portal.dlut.edu.cn/tp/sys/uacm/profile/getUserType'
+        url_info = 'https://portal.dlut.edu.cn/tp/sys/uacm/profile/getUserType'
         data = {}
         headers = {
             'Accept': 'application/json, text/javascript, */*; q=0.01',
@@ -121,9 +120,10 @@ class User:
 
     def get_all_info(self):
         req = self.s.get('http://portal.dlut.edu.cn/tp/view?m=up')
-        url_info = 'http://portal.dlut.edu.cn/tp/sys/uacm/profile/getUserById'
+        url_info = 'https://portal.dlut.edu.cn/tp/sys/uacm/profile/get'
         data = {
-            "ID_NUMBER": self.username
+            "ID_NUMBER": self.username,
+            "mapping": "getUserById"
         }
         headers = {
             'Content-Type': 'application/json;charset=UTF-8',
@@ -266,7 +266,10 @@ class User:
         return
 
     def isactive(self):
-        req = self.s.get("http://portal.dlut.edu.cn/tp/view?m=up", allow_redirects=False, timeout=30)
+        headers = {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36',
+        }
+        req = self.s.get("https://portal.dlut.edu.cn/tp/view?m=up", allow_redirects=False, timeout=30, headers=headers)
         if req.status_code == 200:
             return True
         else:
