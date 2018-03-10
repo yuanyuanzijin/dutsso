@@ -76,6 +76,8 @@ QQ群：344247954（DUT AI Lab），大连理工大学程序员聚集地，欢�
 
 * 获取研究生成绩 User.get_score_yjs()
 
+* 获取研究生培养方案 User.get_plan_yjs()
+
 以上只是部分方法，详细使用文档请查看 Document_ 。
 
 .. _Document: https://github.com/yuanyuanzijin/DutSSO/wiki/Document

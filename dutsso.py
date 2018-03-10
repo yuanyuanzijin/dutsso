@@ -240,6 +240,47 @@ class User:
             score_list.append(c_dict)
         return score_list
 
+    def get_plan_yjs(self):
+        plan_yjs_url = 'http://202.118.65.123/pyxx/pygl/pyjhcx.aspx?xh=%s' % self.username
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'            
+        }
+        req = self.s.get(plan_yjs_url, timeout=30, allow_redirects=False, headers=headers)
+        if req.status_code == 302:
+            req = self.s.get("https://sso.dlut.edu.cn/cas/login?service=http://202.118.65.123/gmis/LoginCAS.aspx", timeout=30, headers=headers)
+            req = self.s.get(plan_yjs_url, timeout=30, headers=headers)
+        soup0 = BeautifulSoup(req.text, 'html.parser')
+
+        plan_list = []
+        plans = soup0.select('#MainWork_dgData tr')[1:]
+        for plan in plans:
+            soup = BeautifulSoup(str(plan), 'html.parser')
+            tds = soup.select('td')
+            p_name = tds[1].text.strip()
+            p_type = tds[3].text.strip()
+            compulsory = tds[4].text.strip()
+            p_compulsory = True if compulsory == "是" else False
+            p_score = tds[5].text.strip()
+            p_time = tds[6].text.strip()
+            p_term = tds[7].text.strip()
+            p_dict = {
+                'p_name': p_name,
+                'p_type': p_type,
+                'p_compulsory': p_compulsory,
+                'p_score': p_score,
+                'p_time': p_time,
+                'p_term': p_term
+            }
+            plan_list.append(p_dict)
+        
+        plan_dict = {
+            'plan': plan_list,
+            'general': soup0.select('#MainWork_lbltitle')[0].text.strip(),
+            'required': soup0.select('#MainWork_Label1')[0].text.strip(),
+            'teacher': soup0.select('#MainWork_Label2')[0].text.strip(),
+        }
+        return plan_dict
+
     def get_library(self):
         url = "http://portal.dlut.edu.cn/sso/sso_tsg.jsp"
         req = self.s.get(url, timeout=30)

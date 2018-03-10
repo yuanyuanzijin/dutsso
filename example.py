@@ -65,6 +65,18 @@ else:
             x.add_row([i['c_name'], i['c_value'], i['c_score'], "必修" if i['compulsory'] else "选修"])
         print(x)
 
+    # 查询研究生培养方案
+    if u.isactive():
+        plan_dict = u.get_plan_yjs()
+        plans = plan_dict['plan']
+        print("\n*****您的研究生培养方案为：")
+        print(plan_dict['teacher'])
+        print(plan_dict['required'])
+        print(plan_dict['general'])
+        x = PrettyTable(["课程名称", "课程类别", "是否必修课", "学分", "学时", "开课学期"])
+        for i in plans:
+            x.add_row([i['p_name'], i['p_type'], "必修" if i['p_compulsory'] else "选修", i['p_score'], i['p_time'], i['p_term']])
+        print(x)
 
     # 查询图书馆
     if u.isactive():
