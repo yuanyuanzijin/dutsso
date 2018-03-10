@@ -40,7 +40,10 @@ class User:
         if os.path.exists(filename):
             with open(filename, mode='r', encoding="utf-8") as f:
                 cookies_dict = f.readline()
-            self.cookies_set(json.loads(cookies_dict))
+            try:    
+                self.cookies_set(json.loads(cookies_dict))
+            except:
+                return False
             return True
         else:
             return False
