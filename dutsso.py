@@ -227,7 +227,10 @@ class User:
             soup2 = BeautifulSoup(str(score), 'html.parser')
             c_name = soup2.select('td')[0].text
             c_score = soup2.select('td')[1].text
-            c_value = soup2.select('span')[0].text
+            try:
+              c_value = soup2.select('span')[0].text
+            except Exception as e:
+              c_value = "评价后查看"
             c_dict = {
                 'c_name': c_name,
                 'c_score': c_score,
