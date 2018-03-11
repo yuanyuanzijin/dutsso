@@ -17,31 +17,37 @@ class User:
         return rsa
       
     def cookies_get(self):
-        cookies_dict = requests.utils.dict_from_cookiejar(self.s.cookies)
-        return cookies_dict
+        cookies_list = []
+        for c in self.s.cookies:
+            c_dict = {
+                'name': c.name,
+                'value': c.value,
+                'domain': c.domain,
+                'path': c.path
+            }
+            cookies_list.append(c_dict)
+        return cookies_list
 
-    def cookies_save(self, cookies_dict=None, path="./"):
-        if not cookies_dict:
-            cookies_dict = self.cookies_get()
+    def cookies_save(self, cookies_list=None, path="./"):
+        if not cookies_list:
+            cookies_list = self.cookies_get()
         filename = os.path.join(path, "cookies_dutsso_"+self.username+".coo")
         with open(filename, mode='w', encoding="utf-8") as f:
-            f.write(json.dumps(cookies_dict))
+            f.write(json.dumps(cookies_list))
         return True
 
-    def cookies_set(self, cookies_dict):
-        self.s.cookies.set('JSESSIONID4', cookies_dict["JSESSIONID4"], path="/", domain="portal.dlut.edu.cn")
-        self.s.cookies.set('JSESSIONID', cookies_dict["JSESSIONID"], path="/", domain="res.dlut.edu.cn")
-        self.s.cookies.set('whistlekey', cookies_dict["whistlekey"], path="/", domain=".dlut.edu.cn")
-        self.s.cookies.set('CASTGC', cookies_dict["CASTGC"], path="/cas/", domain="sso.dlut.edu.cn")
+    def cookies_set(self, cookies_list):
+        for c in cookies_list:
+            self.s.cookies.set(c['name'], c['value'], path=c['path'], domain=c['domain'])
         return True
 
     def cookies_restore(self, path='./'):
         filename = os.path.join(path, "cookies_dutsso_"+self.username+".coo")
         if os.path.exists(filename):
             with open(filename, mode='r', encoding="utf-8") as f:
-                cookies_dict = f.readline()
+                cookies_list = f.readline()
             try:    
-                self.cookies_set(json.loads(cookies_dict))
+                self.cookies_set(json.loads(cookies_list))
             except:
                 return False
             return True
@@ -300,19 +306,24 @@ class User:
         req = self.s.get(url_lib_info, timeout=30)
         soup = BeautifulSoup(req.content.decode('utf-8'), 'html.parser')
         myinfo = soup.select('#mylib_content table tr')
-        borrow_times = myinfo[3].select('td')[2].text.strip("累计借书：").strip("册次")
-        break_times = myinfo[4].select('td')[0].text.strip("违章次数：")
-        break_money = myinfo[4].select('td')[1].text.strip("欠款金额：")
-        bind_email = myinfo[5].select('td')[0].text.strip("Email：").strip()
-        bind_phone = myinfo[7].select('td')[3].text.strip("手机：").strip()
-        lib_dict = {
-            "times": borrow_times,
-            "break": break_times,
-            "money": break_money,
-            "email": bind_email,
-            "phone": bind_phone
-        }
-        return lib_dict
+        try:
+            borrow_times = myinfo[3].select('td')[2].text.strip("累计借书：").strip("册次")
+            break_times = myinfo[4].select('td')[0].text.strip("违章次数：")
+            break_money = myinfo[4].select('td')[1].text.strip("欠款金额：")
+            bind_email = myinfo[5].select('td')[0].text.strip("Email：").strip()
+            bind_phone = myinfo[7].select('td')[3].text.strip("手机：").strip()
+            lib_dict = {
+                "times": borrow_times,
+                "break": break_times,
+                "money": break_money,
+                "email": bind_email,
+                "phone": bind_phone
+            }
+            return lib_dict
+        except Exception as e:
+            iprint("您的图书馆信息未激活，请登录图书馆后再试！")
+            return False
+
 
     def logout(self, clear_save=False, path="./"):
         self.s.cookies.clear()
@@ -333,7 +344,7 @@ class User:
         else:
             return False
 
-    def get_course(self):
+    def get_course_yjs(self):
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'            
         }
@@ -395,8 +406,8 @@ class User:
             course_list.append(course_info)
         return course_list
     
-    def get_course_not_choosed(self, other_classes=False):
-        course_list = self.get_course()
+    def get_course_not_choosed_yjs(self, other_classes=False):
+        course_list = self.get_course_yjs()
         course_list_not_choosed = []
         for i in course_list:
             # 包括未选的其他班级
@@ -409,15 +420,15 @@ class User:
                     course_list_not_choosed.append(i)
         return course_list_not_choosed
 
-    def get_course_choosed(self):
-        course_list = self.get_course()
+    def get_course_choosed_yjs(self):
+        course_list = self.get_course_yjs()
         course_list_choosed = []
         for i in course_list:
             if i['c_choose']:
                 course_list_choosed.append(i)
         return course_list_choosed
 
-    def choose_course(self, course_tr, method="choose", show_info=True):
+    def choose_course_yjs(self, course_tr, method="choose", show_info=True):
         if method == "choose":
             if course_tr['c_choose']:
                 iprint("您已选择%s，不需要重复选择" % course_tr['c_name'], show_info)
@@ -429,6 +440,7 @@ class User:
         else:
             iprint("method参数错误！choose代表选课，cancel代表退课！", show_info)
             return False
+
         url_course = "http://202.118.65.123/pyxx/pygl/pyjhxk.aspx?xh=" + self.username
         req = self.s.get(url_course, allow_redirects=False)
         if req.status_code == 302:
@@ -471,6 +483,37 @@ class User:
         else:
             iprint(back, show_info)
         return False
+
+    def get_evaluate_list_yjs(self):
+        url_evaluate_list = "http://202.118.65.123/pyxx/jxpj/jxpjlist.aspx?xh=" + self.username
+        req = self.s.get(url_evaluate_list, allow_redirects=False)
+        if req.status_code == 302:
+            req = self.s.get("https://sso.dlut.edu.cn/cas/login?service=http://202.118.65.123/gmis/LoginCAS.aspx", timeout=30)
+            req = self.s.get(url_evaluate_list, allow_redirects=False)
+        soup = BeautifulSoup(req.text, "html.parser")
+        evaluate_list = []
+
+        list_tr = soup.select('#MainWork_dgData tr')[1:]
+        for index, course in enumerate(list_tr):
+            soup = BeautifulSoup(str(course), 'html.parser')
+            tds = soup.select('td')
+            e_name = tds[3].text.strip()
+            e_teacher = tds[4].text.strip()
+            e_complete = True if tds[5].text.strip() == "已参加" else False
+            pos = index + 2
+            if pos < 10:
+                e_position = '0' + str(pos)
+            else:
+                e_position = str(pos)
+            e_dict = {
+                'e_name': e_name,
+                'e_teacher': e_teacher,
+                'e_complete': e_complete,
+                'e_position': e_position
+            }
+            evaluate_list.append(e_dict)
+        return evaluate_list
+
     
     def get_network(self):
         req = self.s.get('https://portal.dlut.edu.cn/tp/view?m=up')

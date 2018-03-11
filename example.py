@@ -15,6 +15,9 @@ if not login:
 else:
     print("%s（%s）登录成功！" % (u.name, u.type))
 
+    evaluate_list = u.get_evaluate_list_yjs()
+    print(evaluate_list)
+
     # 获取个人信息
     user_info = u.get_all_info()
     print("\n*****您的个人信息如下：")
@@ -89,14 +92,14 @@ else:
 
     # 研究生选课系统
     if u.isactive():
-        course_list = u.get_course_not_choosed(other_classes=False)
+        course_list = u.get_course_not_choosed_yjs(other_classes=False)
         print("\n*****检测到未选择课程%d门" % len(course_list))
         for i in course_list:
             if not i['c_full']: 
                 print("\n***检测到未选择课程：%s，课程状态：可选" % i['c_name'])
                 ch = input("是否选课？[y/n]")
                 if (ch == "y" or ch == "Y"):
-                    back = u.choose_course(i, method="choose")
+                    back = u.choose_course_yjs(i, method="choose")
                     if back:
                         print("%s选课成功！" % i['c_name'])
                     else:
