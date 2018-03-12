@@ -74,6 +74,8 @@ QQ群：344247954（DUT AI Lab），大连理工大学程序员聚集地，欢�
 
 * 获取校园邮箱信息 User.get_email()
 
+* 获取浴室人数信息 User.get_bathroom()
+
 * 获取研究生成绩 User.get_score_yjs()
 
 * 获取研究生培养方案 User.get_plan_yjs()
@@ -87,11 +89,31 @@ QQ群：344247954（DUT AI Lab），大连理工大学程序员聚集地，欢�
 .. _Document: https://github.com/yuanyuanzijin/DutSSO/wiki/Document
 
 
-其他
+基本示例
 ==============
 
-使用示例请参考 Example.py_ 。
+使用示例请参考Example文件夹中的示例。
 
+* `基本使用（创建用户，登录，登出，查询登录状态）<https://github.com/yuanyuanzijin/dutsso/blob/master/example/0_basic.py>`_
 
-.. _Example.py: https://github.com/yuanyuanzijin/python-dutsso/blob/master/example.py
+* `获取用户信息<https://github.com/yuanyuanzijin/dutsso/blob/master/example/1_get_user_info.py>`_
+
+* `获取玉兰卡信息<https://github.com/yuanyuanzijin/dutsso/blob/master/example/2_get_card.py>`_
+
+* `获取校园网信息<https://github.com/yuanyuanzijin/dutsso/blob/master/example/3_get_network.py>`_
+
+* `获取校园邮箱<https://github.com/yuanyuanzijin/dutsso/blob/master/example/4_get_email.py>`_
+
+* `获取图书馆借书信息<https://github.com/yuanyuanzijin/dutsso/blob/master/example/5_get_libarary>`_
+
+* `获取浴室人数信息<https://github.com/yuanyuanzijin/dutsso/blob/master/example/6_get_bathroom.py>`_
+
+* `（研究生）获取培养方案<https://github.com/yuanyuanzijin/dutsso/blob/master/example/21_yjs_get_plan.py>`_
+
+* `（研究生）获取成绩<https://github.com/yuanyuanzijin/dutsso/blob/master/example/22_yjs_get_score.py>`_
+
+* `（研究生）学生选课<https://github.com/yuanyuanzijin/dutsso/blob/master/example/23_yjs_choose_course.py>`_
+
+* `（研究生）课程评价<https://github.com/yuanyuanzijin/dutsso/blob/master/example/24_yjs_evaluate_course.py>`_
+
 
