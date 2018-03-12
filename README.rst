@@ -78,6 +78,10 @@ QQ群：344247954（DUT AI Lab），大连理工大学程序员聚集地，欢�
 
 * 获取研究生培养方案 User.get_plan_yjs()
 
+* 研究生选课 User.choose_course_yjs()
+
+* 研究生课程评价（可修改评价） User.evaluate_course_yjs()
+
 以上只是部分方法，详细使用文档请查看 Document_ 。
 
 .. _Document: https://github.com/yuanyuanzijin/DutSSO/wiki/Document

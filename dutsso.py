@@ -1,5 +1,5 @@
 import os, json, re
-import requests
+import requests, urllib
 from bs4 import BeautifulSoup
 import execjs
 
@@ -49,6 +49,7 @@ class User:
             try:    
                 self.cookies_set(json.loads(cookies_list))
             except:
+                iprint("登录状态恢复失败！")
                 return False
             return True
         else:
@@ -514,6 +515,124 @@ class User:
             evaluate_list.append(e_dict)
         return evaluate_list
 
+    def get_evaluate_list_unfinished_yjs(self):
+        evaluate_list = self.get_evaluate_list_yjs()
+        evaluate_list_unfinished = []
+        for i in evaluate_list:
+            if not i['e_complete']:
+                evaluate_list_unfinished.append(i)
+        return evaluate_list_unfinished
+    
+    def evaluate_course_yjs(self, evaluate_tr, choice_exam="A", choice_whole="A", remark_text="", rank=1):
+        if not rank:
+            rank = 1
+        choice_list = ['A', 'a', 'B', 'b', 'C', 'c', 'D', 'd']
+        if choice_exam not in choice_list:
+            eprint("choice_exam代表考试方式，选项应为ABCD中的一项！A闭卷考试，B开卷考试，C大作业方式，D其他方式（不填默认为A）")
+            return False
+        
+        if choice_whole not in choice_list:
+            eprint("choice_whole代表总体评分，选项应为ABCD中的一项！（不填默认为A）")
+            return False
+
+        url_evaluate_list = "http://202.118.65.123/pyxx/jxpj/jxpjlist.aspx?xh=" + self.username
+        req = self.s.get(url_evaluate_list, allow_redirects=False)
+        if req.status_code == 302:
+            req = self.s.get("https://sso.dlut.edu.cn/cas/login?service=http://202.118.65.123/gmis/LoginCAS.aspx", timeout=30)
+            req = self.s.get(url_evaluate_list, allow_redirects=False)
+        soup = BeautifulSoup(req.text, "html.parser")
+        __VIEWSTATE = soup.select("#__VIEWSTATE")[0]['value']
+        __VIEWSTATEGENERATOR = soup.select('#__VIEWSTATEGENERATOR')[0]['value']
+        __EVENTTARGET = "ctl00$MainWork$dgData$ctl%s$Linkbutton1" % evaluate_tr['e_position']
+
+        data = {
+            "ctl00$ScriptManager1": "ctl00$MainWork$UpdatePanel|" + __EVENTTARGET,
+            "__EVENTTARGET": __EVENTTARGET,
+            "__EVENTARGUMENT": "",
+            "__VIEWSTATE": __VIEWSTATE,
+            "__VIEWSTATEGENERATOR": __VIEWSTATEGENERATOR,
+            "ctl00$MainWork$hfxh": self.username,
+            "__ASYNCPOST": True
+        }
+        headers = {
+            "Referer": url_evaluate_list,
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36",
+            "X-MicrosoftAjax": "Delta=true",
+            "X-Requested-With": "XMLHttpRequest"
+        }
+        req = self.s.post(url_evaluate_list, data=data, headers=headers)
+        back = req.text.split("|")[-2]
+        new_url = "http://202.118.65.123" + urllib.parse.unquote(back)
+        e_id = int(new_url.split("=")[1].split("&")[0])
+        iprint("成功获取到课程《%s》（评价编号：%d）的评价页面！正在评价中..." % (evaluate_tr['e_name'], e_id))
+        req = self.s.get(new_url, allow_redirects=False, headers=headers)
+        soup = BeautifulSoup(req.text, "html.parser")
+        __VIEWSTATE = soup.select("#__VIEWSTATE")[0]['value']
+        __VIEWSTATEGENERATOR = soup.select('#__VIEWSTATEGENERATOR')[0]['value']
+
+        if choice_exam == "A" or choice_exam == "a":
+            choice_exam_id = "rdoksfs_bjks"
+        elif choice_exam == "B" or choice_exam == "b":
+            choice_exam_id = "rdoksfs_kjks"
+        elif choice_exam == "C" or choice_exam == "c":
+            choice_exam_id = "rdoksfs_dzyfs"
+        else:
+            choice_exam_id = "rdoksfs_qtfs"
+
+        if choice_whole == "A" or choice_whole == "a":
+            choice_whole_id = 322
+        elif choice_whole == "B" or choice_whole == "b":
+            choice_whole_id = 323
+        elif choice_whole == "C" or choice_whole == "c":
+            choice_whole_id = 324
+        else:
+            choice_whole_id = 325
+
+        data = {
+            "ctl00$ScriptManager1": "ctl00$MainWork$UpdatePanel|ctl00$MainWork$cmdAdd",
+            "__EVENTTARGET": "ctl00$MainWork$cmdAdd",
+            "__EVENTARGUMENT": "",
+            "__VIEWSTATE": __VIEWSTATE,
+            "__VIEWSTATEGENERATOR": __VIEWSTATEGENERATOR,
+            "ctl00$MainWork$hfxh": self.username,
+            "ctl00$MainWork$hfpjid": e_id,
+            "ctl00$MainWork$ksfs": choice_exam_id,
+            "ctl00$MainWork$zyskfs": "rdozyskfs_ktsk",
+            "ctl00$MainWork$dltm_jxtd$ctl00$radlda": 261,
+            "ctl00$MainWork$dltm_jxtd$ctl01$radlda": 264,
+            "ctl00$MainWork$dltm_jxtd$ctl02$radlda": 267,
+            "ctl00$MainWork$dltm_jxtd$ctl03$radlda": 271,
+            "ctl00$MainWork$dltm_jxtd$ctl04$radlda": 276,
+            "ctl00$MainWork$dltm_jxtd$ctl05$radlda": 280,
+            "ctl00$MainWork$dltm_jxnr$ctl00$radlda": 284,
+            "ctl00$MainWork$dltm_jxnr$ctl01$radlda": 286,
+            "ctl00$MainWork$dltm_jxnr$ctl02$radlda": 291,
+            "ctl00$MainWork$dltm_jxff$ctl00$radlda": 294,
+            "ctl00$MainWork$dltm_jxff$ctl01$radlda": 299,
+            "ctl00$MainWork$dltm_jxff$ctl02$radlda": 302,
+            "ctl00$MainWork$dltm_jxff$ctl03$radlda": 306,
+            "ctl00$MainWork$dltm_jxxg$ctl00$radlda": 310,
+            "ctl00$MainWork$dltm_jxxg$ctl01$radlda": 314,
+            "ctl00$MainWork$dltm_jxxg$ctl02$radlda": 318,
+            "ctl00$MainWork$txtbz": remark_text,
+            "ctl00$MainWork$radlztpj": choice_whole_id,
+            "ctl00$MainWork$txtrkjspm": rank,
+            "__ASYNCPOST": True
+        }
+        headers = {
+            "Referer": new_url,
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36",
+            "X-MicrosoftAjax": "Delta=true",
+            "X-Requested-With": "XMLHttpRequest"
+        }
+        req = self.s.post(new_url, data=data, headers=headers)
+        info = req.text.split("alert")[1].split("|")[0].split("\\u0027")[1]
+        if info == "提交成功！":
+            return True
+        else:
+            iprint(info)
+            return False
+
     
     def get_network(self):
         req = self.s.get('https://portal.dlut.edu.cn/tp/view?m=up')
@@ -555,7 +674,8 @@ def iprint(info, show_info=True):
     if show_info:
           print("Info: " + info)
 
-
+def eprint(info):
+    print("Error: " + info)
 
 
 
