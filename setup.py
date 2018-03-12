@@ -28,6 +28,7 @@ setup(
     install_requires=[
         'beautifulsoup4',
         'pyexecjs',
-        'requests'
+        'requests',
+        'prettytable'
     ]
 )
