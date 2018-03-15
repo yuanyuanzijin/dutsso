@@ -731,12 +731,17 @@ def eprint(info):
 
 class Mail:
     def __init__(self):
-        pass
+        self.init_finished = False
 
     def init_from_file(self, config_path=None):
         if config_path == None:
             root_path = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
             config_path = os.path.join(root_path, "mail_config.ini")
+            
+        if not os.path.exists(config_path):
+            eprint("请检查配置文件的路径！并请确保已将项目中的mail_config.ini.example重命名为mail_config.ini")
+            return False
+
         c = configparser.ConfigParser()
         with open(config_path) as f:
             c.readfp(f)
@@ -745,9 +750,14 @@ class Mail:
             self.mail_user = c.get('info', 'mail_user')
             self.mail_pass = c.get('info', 'mail_pass')
             self.sender = c.get('info', 'sender')
-        return
+        self.init_finished = True
+        return True
 
     def send(self, mailto, subject, content):
+        if not self.init_finished:
+            eprint("请先使用init_from_file方法初始化邮件配置！")
+            return False
+
         if type(mailto) == str:
             receivers = [mailto]
         else:
