@@ -102,3 +102,4 @@ ENV/
 
 # dutsso
 *.coo
+mail_config.ini

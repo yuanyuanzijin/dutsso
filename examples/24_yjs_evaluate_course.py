@@ -8,7 +8,6 @@ login = u.login()
 if login:
     # 研究生课程评价
     evaluate_list = u.get_evaluate_list_unfinished_yjs()
-    print(evaluate_list)
     print("————共找到未评价课程%d门————" % len(evaluate_list))
     for i in evaluate_list:
         if not i['e_complete']:

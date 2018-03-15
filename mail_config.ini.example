@@ -1,0 +1,6 @@
+[info]
+mail_host = smtp.exmail.qq.com
+mail_port = 465
+mail_user = user@zijinai.cn
+mail_pass = ********
+sender = ZijinAI<user@zijinai.cn>

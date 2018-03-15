@@ -1,7 +1,17 @@
-import os, json, re
-import requests, urllib
+import os
+import json
+import re
+import requests
+import urllib
 from bs4 import BeautifulSoup
 import execjs
+import time
+
+import smtplib
+from email.mime.text import MIMEText
+from email.header import Header
+import configparser
+
 
 class User:
     def __init__(self, username='', password=''):
@@ -28,9 +38,11 @@ class User:
             cookies_list.append(c_dict)
         return cookies_list
 
-    def cookies_save(self, cookies_list=None, path="./"):
+    def cookies_save(self, cookies_list=None, path="cookies/"):
         if not cookies_list:
             cookies_list = self.cookies_get()
+        if not os.path.exists(path):
+            os.mkdir(path)
         filename = os.path.join(path, "cookies_dutsso_"+self.username+".coo")
         with open(filename, mode='w', encoding="utf-8") as f:
             f.write(json.dumps(cookies_list))
@@ -41,7 +53,7 @@ class User:
             self.s.cookies.set(c['name'], c['value'], path=c['path'], domain=c['domain'])
         return True
 
-    def cookies_restore(self, path='./'):
+    def cookies_restore(self, path='cookies/'):
         filename = os.path.join(path, "cookies_dutsso_"+self.username+".coo")
         if os.path.exists(filename):
             with open(filename, mode='r', encoding="utf-8") as f:
@@ -61,10 +73,15 @@ class User:
             if result:
                 iprint("尝试从Cookies中恢复登录状态...", show_info)
                 if self.isactive():
-                    self.name = self.get_info()['name']
-                    self.type = self.get_info()['type']
-                    iprint("已恢复登录状态！", show_info)
-                    return True
+                    try:
+                        info = self.get_info()
+                        self.name = info['name']
+                        self.type = info['type']
+                        iprint("已恢复登录状态！", show_info)
+                        return True
+                    except:
+                        iprint("信息获取失败！")
+                        return True
                 else:
                     iprint("Cookies登录状态已失效！", show_info)
         
@@ -97,9 +114,10 @@ class User:
         newaddr = soup.select('a')[0]['href']
         if newaddr.find("javascript") < 0:
             try:
-                self.name = self.get_info()['name']
-                self.type = self.get_info()['type']
-            except Exception as e:
+                info = self.get_info()
+                self.name = info['name']
+                self.type = info['type']
+            except:
                 iprint("信息获取失败！")
             if auto_save:
                 self.cookies_save()
@@ -178,24 +196,24 @@ class User:
         td = soup.select('.title tr td font')
         info = {
             'bs0': {
-                'total': int(re.sub("\D", "", str(td[0]))),
-                'use': int(re.sub("\D", "", str(td[1]))),
-                'unuse': int(re.sub("\D", "", str(td[2])))  
+                'total': int(re.sub(r"\D", "", str(td[0]))),
+                'use': int(re.sub(r"\D", "", str(td[1]))),
+                'unuse': int(re.sub(r"\D", "", str(td[2])))  
             },
             'bs1': {
-                'total': int(re.sub("\D", "", str(td[3]))),
-                'use': int(re.sub("\D", "", str(td[4]))),
-                'unuse': int(re.sub("\D", "", str(td[5])))
+                'total': int(re.sub(r"\D", "", str(td[3]))),
+                'use': int(re.sub(r"\D", "", str(td[4]))),
+                'unuse': int(re.sub(r"\D", "", str(td[5])))
             },
             'xs0': {
-                'total': int(re.sub("\D", "", str(td[6]))),
-                'use': int(re.sub("\D", "", str(td[7]))),
-                'unuse': int(re.sub("\D", "", str(td[8])))
+                'total': int(re.sub(r"\D", "", str(td[6]))),
+                'use': int(re.sub(r"\D", "", str(td[7]))),
+                'unuse': int(re.sub(r"\D", "", str(td[8])))
             },
             'xs1': {
-                'total': int(re.sub("\D", "", str(td[9]))),
-                'use': int(re.sub("\D", "", str(td[10]))),
-                'unuse': int(re.sub("\D", "", str(td[11])))
+                'total': int(re.sub(r"\D", "", str(td[9]))),
+                'use': int(re.sub(r"\D", "", str(td[10]))),
+                'unuse': int(re.sub(r"\D", "", str(td[11])))
             },
         }
         return info
@@ -219,7 +237,7 @@ class User:
             c_score = soup1.select('td')[1].text
             try:
               c_value = soup1.select('span')[0].text
-            except Exception as e:
+            except:
               c_value = "评价后查看"
             c_dict = {
                 'c_name': c_name,
@@ -236,7 +254,7 @@ class User:
             c_score = soup2.select('td')[1].text
             try:
               c_value = soup2.select('span')[0].text
-            except Exception as e:
+            except:
               c_value = "评价后查看"
             c_dict = {
                 'c_name': c_name,
@@ -321,7 +339,7 @@ class User:
                 "phone": bind_phone
             }
             return lib_dict
-        except Exception as e:
+        except:
             iprint("您的图书馆信息未激活，请登录图书馆后再试！")
             return False
 
@@ -670,6 +688,38 @@ class User:
         }
         return info
 
+    def get_job(self, search_date=None):
+        if not search_date:
+            now = time.localtime(time.time())
+            year = now.tm_year
+            month = now.tm_mon
+            day = now.tm_mday
+            search_date = "%d-%02d-%d" % (year, month, day)
+        job_url = "http://202.118.65.2/app/portals/recruiterNews?date=" + search_date
+        jobs = json.loads(requests.get(job_url).text)
+        jobs_list = []
+        for i in jobs:
+            i_url = "http://202.118.65.2/app/portals/newspage.html?id=" + i['id']
+            detail = requests.get(i_url)
+            try:
+                soup = BeautifulSoup(detail.text, 'html.parser')
+                th = soup.select('table th')
+                i_addr = th[0].text.strip("场地地址：")
+                i_date = th[1].text.strip("日期：")
+                i_time = th[2].text.strip("时间：")
+            except:
+                pass
+            job_dict = {
+                'title': i['title'],
+                'url': i_url,
+                'location': i_addr,
+                'date': i_date,
+                'time': i_time,
+            }
+            jobs_list.append(job_dict)
+        return jobs_list
+
+
 def iprint(info, show_info=True):
     if show_info:
           print("Info: " + info)
@@ -679,7 +729,42 @@ def eprint(info):
 
 
 
+class Mail:
+    def __init__(self):
+        pass
 
+    def init_from_file(self, config_path=None):
+        if config_path == None:
+            root_path = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+            config_path = os.path.join(root_path, "mail_config.ini")
+        c = configparser.ConfigParser()
+        with open(config_path) as f:
+            c.readfp(f)
+            self.mail_host = c.get('info', 'mail_host')
+            self.mail_port = c.get('info', 'mail_port')
+            self.mail_user = c.get('info', 'mail_user')
+            self.mail_pass = c.get('info', 'mail_pass')
+            self.sender = c.get('info', 'sender')
+        return
+
+    def send(self, mailto, subject, content):
+        if type(mailto) == str:
+            receivers = [mailto]
+        else:
+            receivers = mailto
+        mail_msg = content
+        m = MIMEText(mail_msg, 'html', 'utf-8')
+        m['From'] = self.sender
+        m['To'] = ";".join(receivers)
+        m['Subject'] = Header(subject, 'utf-8')
+        try:
+            smtpObj = smtplib.SMTP_SSL()
+            smtpObj.connect(self.mail_host, self.mail_port)
+            smtpObj.login(self.mail_user, self.mail_pass)
+            smtpObj.sendmail(self.sender, receivers, m.as_string())
+            return True
+        except smtplib.SMTPException:
+            return False
 
 
 

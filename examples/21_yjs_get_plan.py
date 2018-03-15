@@ -9,7 +9,7 @@ if login:
     # 查询研究生培养方案
     plan_dict = u.get_plan_yjs()
     plans = plan_dict['plan']
-    print("————您的研究生培养方如下————")
+    print("————您的研究生培养计划如下————")
     print(plan_dict['teacher'])
     print(plan_dict['required'])
     print(plan_dict['general'])
