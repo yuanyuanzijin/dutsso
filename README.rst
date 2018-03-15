@@ -8,34 +8,6 @@ DutSSO是一个可以使你快速登录大连理工大学统一身份认证系�
 QQ群：344247954（DUT AI Lab），大连理工大学程序员聚集地，欢迎大家加入！
 
 
-基于或参考DutSSO的项目
-===========
-
-- Score_Send_Email
-
-定时查询成绩，获取到新成绩后，发送邮件提醒。详见本人项目 `Zijinlib/projects/score_send_email/`_ 。
-
-.. _`Zijinlib/projects/score_send_email/`: https://github.com/yuanyuanzijin/zijinlib/tree/master/projects/score_send_email
-
-- Choose_Course
-
-大连理工大学研究生选课脚本，定时查询课余量并选课。详见本人项目 `Zijinlib/projects/choose_course`_ 。
-
-.. _`Zijinlib/projects/choose_course`: https://github.com/yuanyuanzijin/zijinlib/tree/master/projects/choose_course
-
-- Score_yzm
-
-大连理工大学研究生成绩查询，未使用SSO，需要验证码。详见本人项目 `Web-Crawler/score/`_ 。
-
-.. _`Web-Crawler/score/`: https://github.com/yuanyuanzijin/web-crawler/blob/master/score
-
-- Score-Crawler
-
-东北大学研究生成绩查询，可跳过验证码。详见Onionwyl的项目 `Score-Crawler`_ 。
-
-.. _`Score-Crawler`: https://github.com/onionwyl/score-crawler
-
-
 安装
 ================
 
@@ -49,7 +21,13 @@ QQ群：344247954（DUT AI Lab），大连理工大学程序员聚集地，欢�
 
 即可安装dutsso的最新版本。
 
-由于这是一个新项目，且服务器认证方式可能发生变化，请在使用前检查最新版本，以获得更好的使用体验，
+由于这是一个新项目，且服务器认证方式可能发生变化，请在使用前检查最新版本，以获得更好的使用体验。
+
+
+最新公告
+==============
+从V0.8.0开始加入邮箱类，方便大家发送邮件
+
 
 功能概述
 ==============
@@ -94,6 +72,8 @@ QQ群：344247954（DUT AI Lab），大连理工大学程序员聚集地，欢�
 
 使用示例请参考 `Examples <https://github.com/yuanyuanzijin/dutsso/tree/master/examples>`_ 文件夹中的示例。
 
+* `邮件基本使用 <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/-1_mail_basic.py>`_
+
 * `基本使用（创建用户，登录，登出，查询登录状态） <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/0_basic.py>`_
 
 * `获取用户信息 <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/1_get_user_info.py>`_
@@ -108,12 +88,38 @@ QQ群：344247954（DUT AI Lab），大连理工大学程序员聚集地，欢�
 
 * `获取浴室实时人数信息 <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/6_get_bathroom.py>`_
 
-* `（研究生）获取培养方案 <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/21_yjs_get_plan.py>`_
+* `获取培养计划（研究生） <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/21_yjs_get_plan.py>`_
 
-* `（研究生）获取成绩 <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/22_yjs_get_score.py>`_
+* `获取成绩（研究生） <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/22_yjs_get_score.py>`_
 
-* `（研究生）学生选课 <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/23_yjs_choose_course.py>`_
+* `学生选课（研究生） <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/23_yjs_choose_course.py>`_
 
-* `（研究生）课程评价 <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/24_yjs_evaluate_course.py>`_
+* `课程评价（研究生） <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/24_yjs_evaluate_course.py>`_
 
 
+基于或参考DutSSO的项目
+===========
+
+- Score_Send_Email
+
+定时查询成绩，获取到新成绩后，发送邮件提醒。详见本人项目 `Zijinlib/projects/score_send_email/`_ 。
+
+.. _`Zijinlib/projects/score_send_email/`: https://github.com/yuanyuanzijin/zijinlib/tree/master/projects/score_send_email
+
+- Choose_Course
+
+大连理工大学研究生选课脚本，定时查询课余量并选课。详见本人项目 `Zijinlib/projects/choose_course`_ 。
+
+.. _`Zijinlib/projects/choose_course`: https://github.com/yuanyuanzijin/zijinlib/tree/master/projects/choose_course
+
+- Score_yzm
+
+大连理工大学研究生成绩查询，未使用SSO，需要验证码。详见本人项目 `Web-Crawler/score/`_ 。
+
+.. _`Web-Crawler/score/`: https://github.com/yuanyuanzijin/web-crawler/blob/master/score
+
+- Score-Crawler
+
+东北大学研究生成绩查询，可跳过验证码。详见Onionwyl的项目 `Score-Crawler`_ 。
+
+.. _`Score-Crawler`: https://github.com/onionwyl/score-crawler
