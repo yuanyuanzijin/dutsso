@@ -4,8 +4,15 @@ DutSSO
 
 DutSSO是一个可以使你快速登录大连理工大学统一身份认证系统并获取个人信息的一个Python模块，是本人在写网络爬虫的过程中总结出来的。由于服务器认证方式可能发生变化，所以请在无法使用时及时告知于我，我会及时做出更新。
 
-本人邮箱：yuanyuanzijin@gmail.com。
+本人邮箱：yuanyuanzijin@gmail.com
+
 QQ群：344247954（DUT AI Lab），大连理工大学程序员聚集地，欢迎大家加入！
+
+
+
+最新公告
+==============
+从V0.8.0开始加入邮箱类，方便大家发送邮件
 
 
 安装
@@ -24,17 +31,15 @@ QQ群：344247954（DUT AI Lab），大连理工大学程序员聚集地，欢�
 由于这是一个新项目，且服务器认证方式可能发生变化，请在使用前检查最新版本，以获得更好的使用体验。
 
 
-最新公告
-==============
-从V0.8.0开始加入邮箱类，方便大家发送邮件
-
-
 功能概述
 ==============
 
 详细使用文档请查看 Document_ 。
 
 .. _Document: https://github.com/yuanyuanzijin/DutSSO/wiki/Document
+
+User类
+--------------
 
 * 用户登录 User.login()
 
@@ -62,6 +67,13 @@ QQ群：344247954（DUT AI Lab），大连理工大学程序员聚集地，欢�
 
 * 研究生课程评价（可修改评价） User.evaluate_course_yjs()
 
+Mail类
+----------------
+
+* 邮件初始化 Mail.init_from_file()
+
+* 邮件发送 Mail.send()
+
 以上只是部分方法，详细使用文档请查看 Document_ 。
 
 .. _Document: https://github.com/yuanyuanzijin/DutSSO/wiki/Document
@@ -87,6 +99,8 @@ QQ群：344247954（DUT AI Lab），大连理工大学程序员聚集地，欢�
 * `获取图书馆借书信息 <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/5_get_libarary.py>`_
 
 * `获取浴室实时人数信息 <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/6_get_bathroom.py>`_
+
+* `获取大工招生网指定日期的招聘信息 <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/8_get_jobs_and_send_email.py>`_
 
 * `获取培养计划（研究生） <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/21_yjs_get_plan.py>`_
 
