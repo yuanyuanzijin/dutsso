@@ -6,6 +6,7 @@ import urllib
 from bs4 import BeautifulSoup
 import execjs
 import time
+from operator import itemgetter
 
 import smtplib
 from email.mime.text import MIMEText
@@ -14,17 +15,27 @@ import configparser
 
 
 class User:
-    def __init__(self, username='', password=''):
+    def __init__(self, username='', password='', encrypted_password='', password_length=None):
         self.username = username
         self.password = password
+        self.encrypted_password = encrypted_password
+        self.password_length = password_length
         self.name = ""
         self.type = ""
         self.s = requests.Session()
     
     def __get_key(self, username, password, ticket):  
         ctx = execjs.compile(htmlstr)
-        rsa = ctx.call('strEnc',username+password+ticket, '1', '2', '3')
+        rsa = ctx.call('strEnc', username + password + ticket, '1', '2', '3')
         return rsa
+    
+    def get_encrypted_password(self):
+        if self.password:
+            encrypted_password = self.__get_key("", self.password, "")
+            return encrypted_password
+        else:
+            eprint("密码未初始化，缺少password变量，无法执行此操作！")
+            return False
       
     def cookies_get(self):
         cookies_list = []
@@ -67,7 +78,9 @@ class User:
         else:
             return False
     
-    def login(self, try_cookies=True, auto_save=True, show_info=True):
+    def login(self, try_cookies=True, try_rsa=True, auto_save=True, show_info=True):
+        if not self.username:
+            eprint("请初始化学号！")
         if try_cookies:
             result = self.cookies_restore()
             if result:
@@ -86,22 +99,29 @@ class User:
                     iprint("Cookies登录状态已失效！", show_info)
         
         self.s.cookies.clear()
-        iprint("正在使用用户名密码登录...", show_info)
 
         url = "https://sso.dlut.edu.cn/cas/login?service=http://portal.dlut.edu.cn/tp/"
         req = self.s.get(url, allow_redirects=False, timeout=30)
         soup = BeautifulSoup(req.text, 'html.parser')
-
         ticket = soup.select('#lt')[0]['value']
         execution = soup.select('input')[4]['value']
-        rsa = self.__get_key(self.username, self.password, ticket)
+
+        if try_rsa and self.encrypted_password and self.password_length:
+            iprint("正在使用密文密码登录...", show_info)
+            rsa = self.__get_key(self.username, "", "") + self.encrypted_password + self.__get_key("", "", ticket)
+            pl = self.password_length
+        else:
+            iprint("正在使用用户名密码登录...", show_info)
+            rsa = self.__get_key(self.username, self.password, ticket)
+            pl = len(self.password)
+        ul = len(self.username)
         jsessionid = self.s.cookies['JSESSIONID']
 
         url2 = "https://sso.dlut.edu.cn/cas/login;jsessionid=%s?service=http://portal.dlut.edu.cn/tp/" % jsessionid
         data = {
             'rsa': rsa,
-            'ul': len(self.username),
-            'pl': len(self.password),
+            'ul': ul,
+            'pl': pl,
             'lt': ticket,
             'execution': execution,
             '_eventId': 'submit'
@@ -113,17 +133,19 @@ class User:
         soup = BeautifulSoup(req.text, 'html.parser')
         newaddr = soup.select('a')[0]['href']
         if newaddr.find("javascript") < 0:
+            iprint("用户登录成功！")
             try:
                 info = self.get_info()
                 self.name = info['name']
                 self.type = info['type']
             except:
-                iprint("信息获取失败！")
+                iprint("个人信息获取失败！")
             if auto_save:
                 self.cookies_save()
                 iprint("已自动保存登录信息！", show_info)
             return True
         else:
+            iprint("用户登录失败！")
             return False
     
     def get_info(self):
@@ -701,14 +723,20 @@ class User:
         for i in jobs:
             i_url = "http://202.118.65.2/app/portals/newspage.html?id=" + i['id']
             detail = requests.get(i_url)
+            soup = BeautifulSoup(detail.text, 'html.parser')
+            th = soup.select('table th')
             try:
-                soup = BeautifulSoup(detail.text, 'html.parser')
-                th = soup.select('table th')
                 i_addr = th[0].text.strip("场地地址：")
+            except:
+                i_addr = ""
+            try:
                 i_date = th[1].text.strip("日期：")
+            except:
+                i_date = ""
+            try:
                 i_time = th[2].text.strip("时间：")
             except:
-                pass
+                i_time = ""
             job_dict = {
                 'title': i['title'],
                 'url': i_url,
@@ -717,15 +745,8 @@ class User:
                 'time': i_time,
             }
             jobs_list.append(job_dict)
-        return jobs_list
-
-
-def iprint(info, show_info=True):
-    if show_info:
-          print("Info: " + info)
-
-def eprint(info):
-    print("Error: " + info)
+        jobs_list_sorted = sorted(jobs_list, key=itemgetter("date", "time"))
+        return jobs_list_sorted
 
 
 
@@ -737,21 +758,26 @@ class Mail:
         if config_path == None:
             root_path = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
             config_path = os.path.join(root_path, "mail_config.ini")
-            
+
         if not os.path.exists(config_path):
             eprint("请检查配置文件的路径！并请确保已将项目中的mail_config.ini.example重命名为mail_config.ini")
             return False
 
         c = configparser.ConfigParser()
-        with open(config_path) as f:
-            c.readfp(f)
-            self.mail_host = c.get('info', 'mail_host')
-            self.mail_port = c.get('info', 'mail_port')
-            self.mail_user = c.get('info', 'mail_user')
-            self.mail_pass = c.get('info', 'mail_pass')
-            self.sender = c.get('info', 'sender')
-        self.init_finished = True
-        return True
+        try:
+            with open(config_path) as f:
+                c.readfp(f)
+                self.mail_host = c.get('info', 'mail_host')
+                self.mail_port = c.get('info', 'mail_port')
+                self.mail_user = c.get('info', 'mail_user')
+                self.mail_pass = c.get('info', 'mail_pass')
+                self.sender = c.get('info', 'sender')
+            self.init_finished = True
+            return True
+        except:
+            eprint("mail_config.ini配置文件格式有误，请检查重试！")
+            self.init_finished = False
+            return False
 
     def send(self, mailto, subject, content):
         if not self.init_finished:
@@ -776,6 +802,12 @@ class Mail:
         except smtplib.SMTPException:
             return False
 
+def iprint(info, show_info=True):
+    if show_info:
+          print("Info: " + info)
+
+def eprint(info):
+    print("Error: " + info)
 
 
 

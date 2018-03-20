@@ -1,3 +1,7 @@
+import sys
+sys.path.append('.')
+##################### 以上两行只是为了方便开发，实际不需要 #######################
+
 import dutsso
 import getpass
 

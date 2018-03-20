@@ -12,7 +12,10 @@ QQ群：344247954（DUT AI Lab），大连理工大学程序员聚集地，欢�
 
 最新公告
 ==============
-从V0.8.0开始加入邮箱类，方便大家发送邮件
+
+V0.9.0加入密文登录，以提高信息的安全性，如需账号密码，请使用密文方式。使用方法请参考examples文件夹中的encrypt_basic！
+
+V0.8.0加入邮箱类，方便开发者发送邮件。
 
 
 安装
@@ -42,6 +45,8 @@ User类
 --------------
 
 * 用户登录 User.login()
+
+* 获取密文密码 User.get_encrypted_password()
 
 * 检测登录状态 User.isactive()
 
@@ -88,6 +93,8 @@ Mail类
 
 * `基本使用（创建用户，登录，登出，查询登录状态） <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/0_basic.py>`_
 
+* `密文登录基本使用` <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/-2_encrypt_basic.py>`_
+
 * `获取用户信息 <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/1_get_user_info.py>`_
 
 * `获取玉兰卡信息 <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/2_get_card.py>`_
@@ -109,6 +116,16 @@ Mail类
 * `学生选课（研究生） <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/23_yjs_choose_course.py>`_
 
 * `课程评价（研究生） <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/24_yjs_evaluate_course.py>`_
+
+
+进阶项目
+================
+
+- 浴室人数实时监控
+
+从配置文件中获取用户名和密文密码，自动登录查询浴室人数，并保存到sqlite3数据库中。配合操作系统的定时执行，可实现自动监控。
+
+详见 `save_bathroom_info <https://github.com/yuanyuanzijin/dutsso/tree/master/projects/save_bathroom_info>`_
 
 
 基于或参考DutSSO的项目
