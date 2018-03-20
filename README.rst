@@ -93,7 +93,7 @@ Mail类
 
 * `基本使用（创建用户，登录，登出，查询登录状态） <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/0_basic.py>`_
 
-* `密文登录基本使用` <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/-2_encrypt_basic.py>`_
+* `密文登录基本使用 <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/-2_encrypt_basic.py>`_
 
 * `获取用户信息 <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/1_get_user_info.py>`_
 
@@ -123,9 +123,7 @@ Mail类
 
 - 浴室人数实时监控
 
-从配置文件中获取用户名和密文密码，自动登录查询浴室人数，并保存到sqlite3数据库中。配合操作系统的定时执行，可实现自动监控。
-
-详见 `save_bathroom_info <https://github.com/yuanyuanzijin/dutsso/tree/master/projects/save_bathroom_info>`_
+从配置文件中获取用户名和密文密码，自动登录查询浴室人数，并保存到sqlite3数据库中。配合操作系统的定时执行，可实现自动监控。详见 `save_bathroom_info <https://github.com/yuanyuanzijin/dutsso/tree/master/projects/save_bathroom_info>`_
 
 
 基于或参考DutSSO的项目
