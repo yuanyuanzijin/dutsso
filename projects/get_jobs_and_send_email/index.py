@@ -4,12 +4,15 @@ sys.path.append('.')
 
 import os
 import time
+import sys
 import dutsso
 
+now = time.localtime(time.time())
+search_date = "%d-%02d-%d" % (now.tm_year, now.tm_mon, now.tm_mday)
+
 # 查询招聘信息
-date = "2018-03-15"
 u = dutsso.User()
-jobs = u.get_job(search_date=date)
+jobs = u.get_job(search_date=search_date)      # 默认为当天的
 print("信息获取成功！")
 
 # 发送邮件
@@ -22,13 +25,16 @@ def init_content(date, jobs_list):
     content += "</tbody></table>"
     return content
 
-subject = "Get good jobs!"
-content = init_content(date, jobs)
+subject = "%s招聘信息汇总" % search_date
+content = init_content(search_date, jobs)
 config_path = os.path.join('mail_config.ini')
 
 m = dutsso.Mail()
 m.init_from_file(config_path)
-emails = ["<jinluyuan@vip.qq.com>"]
+
+mail_list_path = os.path.join(sys.path[0], "mail_list.txt")
+with open(mail_list_path) as f:
+    emails = ["<%s>" % l.strip() for l in f.readlines()]
 back = m.send(emails, subject, content)
 if back:
     print("发送成功！")

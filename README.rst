@@ -107,7 +107,7 @@ Mail类
 
 * `获取浴室实时人数信息 <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/6_get_bathroom.py>`_
 
-* `获取大工招生网指定日期的招聘信息 <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/8_get_jobs_and_send_email.py>`_
+* `获取大工就业网指定日期的招聘信息 <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/8_get_jobs.py>`_
 
 * `获取培养计划（研究生） <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/21_yjs_get_plan.py>`_
 
@@ -124,6 +124,10 @@ Mail类
 - 浴室人数实时监控
 
 从配置文件中获取用户名和密文密码，自动登录查询浴室人数，并保存到sqlite3数据库中。配合操作系统的定时执行，可实现自动监控。详见 `save_bathroom_info <https://github.com/yuanyuanzijin/dutsso/tree/master/projects/save_bathroom_info>`_
+
+- 每天定时发送大工就业网面试信息
+
+从mail_list中获取发送对象。配合操作系统的定时执行，可实现每天定时发送。详见 `get_jobs_and_send_email <https://github.com/yuanyuanzijin/dutsso/tree/master/projects/get_jobs_and_send_email>`_
 
 
 基于或参考DutSSO的项目
