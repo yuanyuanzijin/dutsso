@@ -93,7 +93,7 @@ class User:
                         iprint("已恢复登录状态！", show_info)
                         return True
                     except:
-                        iprint("信息获取失败！")
+                        iprint("个人信息获取失败！")
                         return True
                 else:
                     iprint("Cookies登录状态已失效！", show_info)
@@ -133,7 +133,7 @@ class User:
         soup = BeautifulSoup(req.text, 'html.parser')
         newaddr = soup.select('a')[0]['href']
         if newaddr.find("javascript") < 0:
-            iprint("用户登录成功！")
+            iprint("用户登录成功！", show_info)
             try:
                 info = self.get_info()
                 self.name = info['name']
@@ -145,7 +145,7 @@ class User:
                 iprint("已自动保存登录信息！", show_info)
             return True
         else:
-            iprint("用户登录失败！")
+            iprint("用户登录失败！", show_info)
             return False
     
     def get_info(self):

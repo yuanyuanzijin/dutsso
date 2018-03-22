@@ -1,1 +1,1 @@
-* 8 * * * cd /home/yuanyuanzijin/code/dutsso-dev && python3 projects/get_jobs_and_send_email/index.py > /dev/null 2>&1
+0 8 * * * cd /home/yuanyuanzijin/code/dutsso-dev && python3 projects/get_jobs_and_send_email/index.py > /dev/null 2>&1
