@@ -44,7 +44,7 @@ db_path = os.path.join(sys.path[0], "users.db")
 conn = sqlite3.connect(db_path)
 
 cursor = conn.cursor()
-cursor.execute('CREATE TABLE IF NOT EXISTS Users (id integer primary key autoincrement, username varchar, encrypted_password varchar, success boolen)') 
+cursor.execute('CREATE TABLE IF NOT EXISTS Users (id integer primary key autoincrement, username varchar, encrypted_password varchar, password_length int, success boolen)') 
 conn.commit()
 
 while 1:
@@ -64,7 +64,7 @@ while 1:
                     login = u.login(show_info=False)
                     if login:
                         encrypted_password = u.get_encrypted_password()
-                        cursor.execute("INSERT INTO Users (username, encrypted_password, success) VALUES ('%s', '%s', 'true')" % (username, encrypted_password))
+                        cursor.execute("INSERT INTO Users (username, encrypted_password, password_length, success) VALUES ('%s', '%s', '%s', 'true')" % (username, encrypted_password, len(password)))
                         conn.commit()
                         print("用户%s创建成功！" % username)
                     else:
