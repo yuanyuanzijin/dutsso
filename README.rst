@@ -121,13 +121,17 @@ Mail类
 进阶项目
 ================
 
+- 多用户管理程序
+
+管理多个用户的账号和密码（密文）到数据库中，以供其他项目使用。详见 `multi_users_admin <https://github.com/yuanyuanzijin/dutsso/tree/master/projects/multi_users_admin>`_ 。
+
 - 浴室人数实时监控
 
-从配置文件中获取用户名和密文密码，自动登录查询浴室人数，并保存到sqlite3数据库中。配合操作系统的定时执行，可实现自动监控。详见 `save_bathroom_info <https://github.com/yuanyuanzijin/dutsso/tree/master/projects/save_bathroom_info>`_
+从配置文件中获取用户名和密文密码，自动登录查询浴室人数，并保存到sqlite3数据库中。配合操作系统的定时执行，可实现自动监控。详见 `save_bathroom_info <https://github.com/yuanyuanzijin/dutsso/tree/master/projects/save_bathroom_info>`_ 。
 
 - 每天定时发送大工就业网面试信息
 
-从mail_list中获取发送对象。配合操作系统的定时执行，可实现每天定时发送。详见 `get_jobs_and_send_email <https://github.com/yuanyuanzijin/dutsso/tree/master/projects/get_jobs_and_send_email>`_
+从mail_list中获取发送对象。配合操作系统的定时执行，可实现每天定时发送。详见 `get_jobs_and_send_email <https://github.com/yuanyuanzijin/dutsso/tree/master/projects/get_jobs_and_send_email>`_ 。
 
 
 基于或参考DutSSO的项目
