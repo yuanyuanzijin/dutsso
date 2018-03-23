@@ -1,1 +1,0 @@
-*/10 8-23 * * * cd /home/yuanyuanzijin/code/dutsso-dev && python3 projects/yjs_score_send_email/index.py > /dev/null 2>&1

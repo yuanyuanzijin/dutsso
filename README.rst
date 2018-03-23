@@ -13,7 +13,7 @@ QQ群：344247954（DUT AI Lab），大连理工大学程序员聚集地，欢�
 最新公告
 ==============
 
-V0.9.0加入密文登录，以提高信息的安全性，如需账号密码，请使用密文方式。使用方法请参考examples文件夹中的 `encrypt_basic <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/-2_encrypt_basic.py>`_ ！
+V0.9.0加入密文登录，以提高信息的安全性，如需储存账号密码，请使用密文方式。使用方法请参考examples文件夹中的 `encrypt_basic <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/-2_encrypt_basic.py>`_ ！
 
 V0.8.0加入邮箱类，方便开发者发送邮件。
 
@@ -70,7 +70,10 @@ User类
 
 * 研究生选课 User.choose_course_yjs()
 
-* 研究生课程评价（可修改评价） User.evaluate_course_yjs()
+* 研究生课程评价（可更新评价） User.evaluate_course_yjs()
+
+* 获取大工就业网招聘信息 User.get_job()
+
 
 Mail类
 ----------------
@@ -87,9 +90,10 @@ Mail类
 基本示例
 ==============
 
-使用示例请参考 `Examples <https://github.com/yuanyuanzijin/dutsso/tree/master/examples>`_ 文件夹中的示例。
+使用示例展示了各个功能的基本用法，可供新手参考。基本示例存放在 `Examples <https://github.com/yuanyuanzijin/dutsso/tree/master/examples>`_ 文件夹中。
 
-* `邮件基本使用 <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/-1_mail_basic.py>`_
+需要登录的功能
+--------------
 
 * `基本使用（创建用户，登录，登出，查询登录状态） <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/0_basic.py>`_
 
@@ -107,8 +111,6 @@ Mail类
 
 * `获取浴室实时人数信息 <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/6_get_bathroom.py>`_
 
-* `获取大工就业网指定日期的招聘信息 <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/8_get_jobs.py>`_
-
 * `获取培养计划（研究生） <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/21_yjs_get_plan.py>`_
 
 * `获取成绩（研究生） <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/22_yjs_get_score.py>`_
@@ -117,29 +119,42 @@ Mail类
 
 * `课程评价（研究生） <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/24_yjs_evaluate_course.py>`_
 
+不需要登录的功能
+----------------
+
+* `邮件基本使用 <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/-1_mail_basic.py>`_
+
+* `获取大工就业网招聘信息 <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/8_get_jobs.py>`_
+
 
 进阶项目
 ================
 
-- 多用户管理程序
+进阶项目包括了基于dutsso的复杂项目，可以理解为将examples中的示例运用到了实际项目中。
 
-管理多个用户的账号和密码（密文）到数据库中，以供其他项目使用。详见 `multi_users_admin <https://github.com/yuanyuanzijin/dutsso/tree/master/projects/multi_users_admin>`_ 。
+- 多用户管理系统
+
+管理多个用户账号和密码的脚本程序，信息存在sqlite数据库中，以供其他项目使用，密码转化为密文储存。详见 `multi_users_admin <https://github.com/yuanyuanzijin/dutsso/tree/master/projects/multi_users_admin>`_ 。
+
+- 研究生新成绩提醒
+
+查询研究生成绩，和数据库中的比对，发现新成绩后自动发送邮件提醒。配合操作系统的定时运行，可实现自动提醒新成绩。详见 `yjs_score_send_email <https://github.com/yuanyuanzijin/dutsso/tree/master/projects/yjs_score_send_email>`_ 。
 
 - 浴室人数实时监控
 
 从配置文件中获取用户名和密文密码，自动登录查询浴室人数，并保存到sqlite3数据库中。配合操作系统的定时执行，可实现自动监控。详见 `save_bathroom_info <https://github.com/yuanyuanzijin/dutsso/tree/master/projects/save_bathroom_info>`_ 。
 
-- 每天定时发送大工就业网面试信息
+- 大工就业网招聘信息自动发送程序
 
-从mail_list中获取发送对象。配合操作系统的定时执行，可实现每天定时发送。详见 `get_jobs_and_send_email <https://github.com/yuanyuanzijin/dutsso/tree/master/projects/get_jobs_and_send_email>`_ 。
+查询大工就业网指定日期的招聘信息，发送给mail_list中的邮箱。配合操作系统的定时执行，可实现每天定时发送。详见 `get_jobs_and_send_email <https://github.com/yuanyuanzijin/dutsso/tree/master/projects/get_jobs_and_send_email>`_ 。
 
 
-基于或参考DutSSO的项目
+更多基于或参考DutSSO的项目
 ===========
 
 - Score_Send_Email
 
-定时查询成绩，获取到新成绩后，发送邮件提醒。详见本人项目 `Zijinlib/projects/score_send_email/`_ 。
+定时查询成绩，获取到新成绩后，发送邮件提醒，程序一直运行，未使用操作系统的定时任务，不适合长期执行。详见本人项目 `Zijinlib/projects/score_send_email/`_ 。
 
 .. _`Zijinlib/projects/score_send_email/`: https://github.com/yuanyuanzijin/zijinlib/tree/master/projects/score_send_email
 
