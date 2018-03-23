@@ -30,21 +30,33 @@ def show_two():
     print("\n> 主菜单 > 删除用户")
     user_list.clear()
 
-    result = cursor.execute("SELECT username, success FROM Users").fetchall()
+    result = cursor.execute("SELECT username, name, user_type, success FROM Users").fetchall()
     if result:
-        x = PrettyTable(["序号", "学号", "上次登录是否成功"])
+        x = PrettyTable(["序号", "学号", "姓名", "类型", "上次登录是否成功"])
         for index, i in enumerate(result):
-            x.add_row([index+1, i[0], "是" if i[1] == "true" else "否"])
+            x.add_row([index+1, i[0], i[1], i[2], "是" if i[3] == "true" else "否"])
             user_list[str(index+1)] = i[0]
-            print(x)
+        print(x)
     else:
         print("无用户信息！")
     
-db_path = os.path.join(sys.path[0], "users.db")
+db_path = os.path.join("users.db")
 conn = sqlite3.connect(db_path)
 
 cursor = conn.cursor()
-cursor.execute('CREATE TABLE IF NOT EXISTS Users (id integer primary key autoincrement, username varchar, encrypted_password varchar, success boolen)') 
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS Users (
+    id integer primary key autoincrement,
+    username varchar unique,
+    name varchar,
+    user_type varchar,
+    encrypted_password varchar,
+    password_length int,
+    email varchar,
+    success boolen
+)
+'''
+) 
 conn.commit()
 
 while 1:
@@ -63,8 +75,14 @@ while 1:
                     u = dutsso.User(username=username, password=password)
                     login = u.login(show_info=False)
                     if login:
+                        while 1:
+                            email = input("请输入您的邮箱（用于接收提醒）：")
+                            if email:
+                                break
+                            else:
+                                print("输入不可以为空！")
                         encrypted_password = u.get_encrypted_password()
-                        cursor.execute("INSERT INTO Users (username, encrypted_password, success) VALUES ('%s', '%s', 'true')" % (username, encrypted_password))
+                        cursor.execute("INSERT INTO Users (username, encrypted_password, password_length, name, user_type, email, success) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', 'true')" % (username, encrypted_password, len(password), u.name, u.type, email))
                         conn.commit()
                         print("用户%s创建成功！" % username)
                     else:

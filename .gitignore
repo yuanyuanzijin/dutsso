@@ -107,4 +107,4 @@ test.py
 projects/save_bathroom_info/bathroom.db
 projects/save_bathroom_info/single_user_config.ini
 projects/get_jobs_and_send_email/mail_list.txt
-projects/multi_users_admin/users.db
+users.db

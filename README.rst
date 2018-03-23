@@ -103,7 +103,7 @@ Mail类
 
 * `获取校园邮箱 <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/4_get_email.py>`_
 
-* `获取图书馆借书信息 <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/5_get_libarary.py>`_
+* `获取图书馆借书信息 <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/5_get_library.py>`_
 
 * `获取浴室实时人数信息 <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/6_get_bathroom.py>`_
 
