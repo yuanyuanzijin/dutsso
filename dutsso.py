@@ -360,10 +360,10 @@ class User:
         if req.status_code == 302:
             iprint("研究生管理系统cookies失效，正在尝试通过SSO认证...")
             req = self.s.get("https://sso.dlut.edu.cn/cas/login?service=http://202.118.65.123/gmis/LoginCAS.aspx", timeout=30, headers=headers)
-            req = self.s.get('http://202.118.65.123/pyxx/grgl/xskccjcx.aspx?xh=%s' % self.username, timeout=30, headers=headers)
+            req = self.s.get('http://202.118.65.123/pyxx/grgl/xskccjcx.aspx?xh=%s' % self.username, timeout=30, allow_redirects=False, headers=headers)
         if req.status_code == 302:
             iprint("SSO认证失效，正在尝试重新登录...")
-            login = self.login()
+            login = self.login(try_cookies=False)
             if not login:
                 iprint("SSO登录失败！")
                 return False

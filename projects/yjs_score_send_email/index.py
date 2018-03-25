@@ -64,6 +64,7 @@ for i in range(len(users)):
         scores = u.get_score_yjs()
         if scores != False:
             cursor.execute("UPDATE Score_yjs_users SET get_success='true' WHERE username='%s'" % u.username)
+            print(len(scores))
             if len(scores) > old_nums:
                 back = send_email(scores, u)
                 if back:
