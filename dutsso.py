@@ -352,27 +352,44 @@ class User:
         jobs_list_sorted = sorted(jobs_list, key=itemgetter("date", "time"))
         return jobs_list_sorted
 
-    def get_score_yjs(self):
+    def active_yjs(self):
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'            
         }
-        req = self.s.get('http://202.118.65.123/pyxx/grgl/xskccjcx.aspx?xh=%s' % self.username, timeout=30, allow_redirects=False, headers=headers)
-        if req.status_code == 302:
-            iprint("研究生管理系统cookies失效，正在尝试通过SSO认证...")
-            req = self.s.get("https://sso.dlut.edu.cn/cas/login?service=http://202.118.65.123/gmis/LoginCAS.aspx", timeout=30, headers=headers)
-            req = self.s.get('http://202.118.65.123/pyxx/grgl/xskccjcx.aspx?xh=%s' % self.username, timeout=30, allow_redirects=False, headers=headers)
+        iprint("研究生管理系统cookies失效，正在尝试通过SSO认证...")
+        self.s.get("https://sso.dlut.edu.cn/cas/login?service=http://202.118.65.123/gmis/LoginCAS.aspx", timeout=30, headers=headers)
+        req = self.s.get("http://202.118.65.123/pyxx/default.aspx", timeout=30, allow_redirects=False, headers=headers)
         if req.status_code == 302:
             iprint("SSO认证失效，正在尝试重新登录...")
             login = self.login(try_cookies=False)
             if not login:
                 iprint("SSO登录失败！")
                 return False
-            req = self.s.get("https://sso.dlut.edu.cn/cas/login?service=http://202.118.65.123/gmis/LoginCAS.aspx", timeout=30, headers=headers)
-            req = self.s.get('http://202.118.65.123/pyxx/grgl/xskccjcx.aspx?xh=%s' % self.username, timeout=30, headers=headers)
-        if req.status_code == 200:
-            self.cookies_save()
-        else:
-            return False
+
+            iprint("SSO登录成功！")
+            self.s.get("https://sso.dlut.edu.cn/cas/login?service=http://202.118.65.123/gmis/LoginCAS.aspx", timeout=30, headers=headers)
+            req = self.s.get("http://202.118.65.123/pyxx/default.aspx", timeout=30, allow_redirects=False, headers=headers)
+            if req.status_code == 302:
+                iprint("激活失败！")
+                return False
+        
+        self.cookies_save()
+        iprint("研究生管理系统激活成功！已保存登录状态！")
+        return True
+            
+
+    def get_score_yjs(self):
+        score_url = 'http://202.118.65.123/pyxx/grgl/xskccjcx.aspx?xh=%s' % self.username
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'            
+        }
+        req = self.s.get(score_url, timeout=30, allow_redirects=False, headers=headers)
+        if req.status_code == 302:
+            active = self.active_yjs()    
+            if active:
+                req = self.s.get(score_url, timeout=30, headers=headers)
+            else:
+                return False
 
         score_list = []
         soup = BeautifulSoup(req.text, 'html.parser')
@@ -418,12 +435,11 @@ class User:
         }
         req = self.s.get(plan_yjs_url, timeout=30, allow_redirects=False, headers=headers)
         if req.status_code == 302:
-            req = self.s.get("https://sso.dlut.edu.cn/cas/login?service=http://202.118.65.123/gmis/LoginCAS.aspx", timeout=30, headers=headers)
-            req = self.s.get(plan_yjs_url, timeout=30, headers=headers)
-        if req.status_code == 200:
-            self.cookies_save()
-        else:
-            return False
+            active = self.active_yjs()    
+            if active:
+                req = self.s.get(plan_yjs_url, timeout=30, headers=headers)
+            else:
+                return False
             
         plan_list = []
         soup0 = BeautifulSoup(req.text, 'html.parser')
@@ -463,12 +479,11 @@ class User:
         url_course = "http://202.118.65.123/pyxx/pygl/pyjhxk.aspx?xh=" + self.username
         req = self.s.get(url_course, allow_redirects=False, headers=headers)
         if req.status_code == 302:
-            req = self.s.get("https://sso.dlut.edu.cn/cas/login?service=http://202.118.65.123/gmis/LoginCAS.aspx", timeout=30, headers=headers)
-            req = self.s.get(url_course, allow_redirects=False)
-        if req.status_code == 200:
-            self.cookies_save()
-        else:
-            return False
+            active = self.active_yjs()    
+            if active:
+                req = self.s.get(url_course, timeout=30, headers=headers)
+            else:
+                return False
 
         soup = BeautifulSoup(req.text, "html.parser")
         tr_list = soup.select("#MainWork_dgData tr")[1:]
@@ -558,11 +573,18 @@ class User:
             iprint("method参数错误！choose代表选课，cancel代表退课！", show_info)
             return False
 
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'            
+        }
         url_course = "http://202.118.65.123/pyxx/pygl/pyjhxk.aspx?xh=" + self.username
         req = self.s.get(url_course, allow_redirects=False)
         if req.status_code == 302:
-            req = self.s.get("https://sso.dlut.edu.cn/cas/login?service=http://202.118.65.123/gmis/LoginCAS.aspx", timeout=30)
-            req = self.s.get(url_course, allow_redirects=False)
+            active = self.active_yjs()    
+            if active:
+                req = self.s.get(url_course, timeout=30, headers=headers)
+            else:
+                return False
+
         soup = BeautifulSoup(req.text, "html.parser")
         __VIEWSTATE = soup.select("#__VIEWSTATE")[0]['value']
         __VIEWSTATEGENERATOR = soup.select('#__VIEWSTATEGENERATOR')[0]['value']
@@ -602,15 +624,17 @@ class User:
         return False
 
     def get_evaluate_list_yjs(self):
-        url_evaluate_list = "http://202.118.65.123/pyxx/jxpj/jxpjlist.aspx?xh=" + self.username
-        req = self.s.get(url_evaluate_list, allow_redirects=False)
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'            
+        }
+        url_evaluate_url = "http://202.118.65.123/pyxx/jxpj/jxpjlist.aspx?xh=" + self.username
+        req = self.s.get(url_evaluate_url, allow_redirects=False)
         if req.status_code == 302:
-            req = self.s.get("https://sso.dlut.edu.cn/cas/login?service=http://202.118.65.123/gmis/LoginCAS.aspx", timeout=30)
-            req = self.s.get(url_evaluate_list, allow_redirects=False)
-        if req.status_code == 200:
-            self.cookies_save()
-        else:
-            return False
+            active = self.active_yjs()    
+            if active:
+                req = self.s.get(url_evaluate_url, timeout=30, headers=headers)
+            else:
+                return False
 
         evaluate_list = []
         soup = BeautifulSoup(req.text, "html.parser")
@@ -655,11 +679,11 @@ class User:
             eprint("choice_whole代表总体评分，选项应为ABCD中的一项！（不填默认为A）")
             return False
 
-        url_evaluate_list = "http://202.118.65.123/pyxx/jxpj/jxpjlist.aspx?xh=" + self.username
-        req = self.s.get(url_evaluate_list, allow_redirects=False)
+        url_evaluate_url = "http://202.118.65.123/pyxx/jxpj/jxpjlist.aspx?xh=" + self.username
+        req = self.s.get(url_evaluate_url, allow_redirects=False)
         if req.status_code == 302:
             req = self.s.get("https://sso.dlut.edu.cn/cas/login?service=http://202.118.65.123/gmis/LoginCAS.aspx", timeout=30)
-            req = self.s.get(url_evaluate_list, allow_redirects=False)
+            req = self.s.get(url_evaluate_url, allow_redirects=False)
         if req.status_code == 200:
             self.cookies_save()
         else:
@@ -680,12 +704,12 @@ class User:
             "__ASYNCPOST": True
         }
         headers = {
-            "Referer": url_evaluate_list,
+            "Referer": url_evaluate_url,
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36",
             "X-MicrosoftAjax": "Delta=true",
             "X-Requested-With": "XMLHttpRequest"
         }
-        req = self.s.post(url_evaluate_list, data=data, headers=headers)
+        req = self.s.post(url_evaluate_url, data=data, headers=headers)
         back = req.text.split("|")[-2]
         new_url = "http://202.118.65.123" + urllib.parse.unquote(back)
         e_id = int(new_url.split("=")[1].split("&")[0])
