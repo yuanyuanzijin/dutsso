@@ -240,6 +240,118 @@ class User:
         }
         return info
 
+
+    def get_library(self):
+        url = "http://portal.dlut.edu.cn/sso/sso_tsg.jsp"
+        req = self.s.get(url, timeout=30)
+        soup = BeautifulSoup(req.text, "html.parser")
+        time = soup.select('form input')[1]['value']
+        verify = soup.select('form input')[2]['value']
+        
+        url_lib_login = "http://opac.lib.dlut.edu.cn/reader/hwthau.php"
+        data = {
+            'un': self.username,
+            'time': time,
+            'verify': verify
+        }
+        req = self.s.post(url_lib_login, data=data, allow_redirects=False, timeout=30)
+        
+        url_lib_info = "http://opac.lib.dlut.edu.cn/reader/redr_info_rule.php"
+        req = self.s.get(url_lib_info, timeout=30)
+        soup = BeautifulSoup(req.content.decode('utf-8'), 'html.parser')
+        myinfo = soup.select('#mylib_content table tr')
+        try:
+            borrow_times = myinfo[3].select('td')[2].text.strip("累计借书：").strip("册次")
+            break_times = myinfo[4].select('td')[0].text.strip("违章次数：")
+            break_money = myinfo[4].select('td')[1].text.strip("欠款金额：")
+            bind_email = myinfo[5].select('td')[0].text.strip("Email：").strip()
+            bind_phone = myinfo[7].select('td')[3].text.strip("手机：").strip()
+            lib_dict = {
+                "times": borrow_times,
+                "break": break_times,
+                "money": break_money,
+                "email": bind_email,
+                "phone": bind_phone
+            }
+            return lib_dict
+        except:
+            iprint("您的图书馆信息未激活，请登录图书馆后再试！")
+            return False
+
+    def get_network(self):
+        req = self.s.get('https://portal.dlut.edu.cn/tp/view?m=up')
+        url_info = 'https://portal.dlut.edu.cn/tp/up/subgroup/getTrafficList'
+        data = {}
+        headers = {
+            'Content-Type': 'application/json;charset=UTF-8',
+            'Origin': 'http://portal.dlut.edu.cn',
+            'Referer': 'http://portal.dlut.edu.cn/tp/view?m=up',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'
+        }
+        req = self.s.post(url_info, data=json.dumps(data), headers=headers)
+        info_dict = json.loads(req.text)[0]
+        info = {
+            'fee': info_dict['fee'],
+            'used': info_dict['usedTraffic']
+        }
+        return info
+
+    def get_email(self):
+        req = self.s.get('https://portal.dlut.edu.cn/tp/view?m=up')
+        url_info = 'https://portal.dlut.edu.cn/tp/up/subgroup/getUnReadList'
+        data = {}
+        headers = {
+            'Content-Type': 'application/json;charset=UTF-8',
+            'Origin': 'http://portal.dlut.edu.cn',
+            'Referer': 'http://portal.dlut.edu.cn/tp/view?m=up',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'
+        }
+        req = self.s.post(url_info, data=json.dumps(data), headers=headers)
+        info_dict = json.loads(req.text)
+        info = {
+            'email': info_dict['email'],
+            'unread': info_dict['num']
+        }
+        return info
+
+    def get_job(self, search_date=None):
+        if not search_date:
+            now = time.localtime(time.time())
+            year = now.tm_year
+            month = now.tm_mon
+            day = now.tm_mday
+            search_date = "%d-%02d-%d" % (year, month, day)
+        job_url = "http://202.118.65.2/app/portals/recruiterNews?date=" + search_date
+        jobs = json.loads(requests.get(job_url).text)
+        jobs_list = []
+        for i in jobs:
+            i_url = "http://202.118.65.2/app/portals/newspage.html?id=" + i['id']
+            detail = requests.get(i_url)
+            soup = BeautifulSoup(detail.text, 'html.parser')
+            th = soup.select('table th')
+            try:
+                i_addr = th[0].text.strip("场地地址：")
+            except:
+                i_addr = ""
+            try:
+                i_date = th[1].text.strip("日期：")
+            except:
+                i_date = ""
+            try:
+                i_time = th[2].text.strip("时间：")
+            except:
+                i_time = ""
+            job_dict = {
+                'title': i['title'],
+                'url': i_url,
+                'location': i_addr,
+                'date': i_date,
+                'time': i_time,
+            }
+            jobs_list.append(job_dict)
+        jobs_list_sorted = sorted(jobs_list, key=itemgetter("date", "time"))
+        return jobs_list_sorted
+
     def get_score_yjs(self):
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'            
@@ -248,10 +360,13 @@ class User:
         if req.status_code == 302:
             req = self.s.get("https://sso.dlut.edu.cn/cas/login?service=http://202.118.65.123/gmis/LoginCAS.aspx", timeout=30, headers=headers)
             req = self.s.get('http://202.118.65.123/pyxx/grgl/xskccjcx.aspx?xh=%s' % self.username, timeout=30)
-        soup = BeautifulSoup(req.text, 'html.parser')
+        if req.status_code == 200:
+            self.cookies_save()
+        else:
+            return False
 
         score_list = []
-
+        soup = BeautifulSoup(req.text, 'html.parser')
         bx_scores = soup.select('#MainWork_dgData tr')[1:]
         for score in bx_scores:
             soup1 = BeautifulSoup(str(score), 'html.parser')
@@ -296,9 +411,13 @@ class User:
         if req.status_code == 302:
             req = self.s.get("https://sso.dlut.edu.cn/cas/login?service=http://202.118.65.123/gmis/LoginCAS.aspx", timeout=30, headers=headers)
             req = self.s.get(plan_yjs_url, timeout=30, headers=headers)
-        soup0 = BeautifulSoup(req.text, 'html.parser')
-
+        if req.status_code == 200:
+            self.cookies_save()
+        else:
+            return False
+            
         plan_list = []
+        soup0 = BeautifulSoup(req.text, 'html.parser')
         plans = soup0.select('#MainWork_dgData tr')[1:]
         for plan in plans:
             soup = BeautifulSoup(str(plan), 'html.parser')
@@ -328,63 +447,6 @@ class User:
         }
         return plan_dict
 
-    def get_library(self):
-        url = "http://portal.dlut.edu.cn/sso/sso_tsg.jsp"
-        req = self.s.get(url, timeout=30)
-        soup = BeautifulSoup(req.text, "html.parser")
-        time = soup.select('form input')[1]['value']
-        verify = soup.select('form input')[2]['value']
-        
-        url_lib_login = "http://opac.lib.dlut.edu.cn/reader/hwthau.php"
-        data = {
-            'un': self.username,
-            'time': time,
-            'verify': verify
-        }
-        req = self.s.post(url_lib_login, data=data, allow_redirects=False, timeout=30)
-        
-        url_lib_info = "http://opac.lib.dlut.edu.cn/reader/redr_info_rule.php"
-        req = self.s.get(url_lib_info, timeout=30)
-        soup = BeautifulSoup(req.content.decode('utf-8'), 'html.parser')
-        myinfo = soup.select('#mylib_content table tr')
-        try:
-            borrow_times = myinfo[3].select('td')[2].text.strip("累计借书：").strip("册次")
-            break_times = myinfo[4].select('td')[0].text.strip("违章次数：")
-            break_money = myinfo[4].select('td')[1].text.strip("欠款金额：")
-            bind_email = myinfo[5].select('td')[0].text.strip("Email：").strip()
-            bind_phone = myinfo[7].select('td')[3].text.strip("手机：").strip()
-            lib_dict = {
-                "times": borrow_times,
-                "break": break_times,
-                "money": break_money,
-                "email": bind_email,
-                "phone": bind_phone
-            }
-            return lib_dict
-        except:
-            iprint("您的图书馆信息未激活，请登录图书馆后再试！")
-            return False
-
-
-    def logout(self, clear_save=False, path="./"):
-        self.s.cookies.clear()
-        if clear_save:
-            filename = os.path.join(path, "cookies_dutsso_"+self.username+".coo")
-            if os.path.exists(filename):
-                os.remove(filename)
-                return
-        return
-
-    def isactive(self):
-        headers = {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36',
-        }
-        req = self.s.get("https://portal.dlut.edu.cn/tp/view?m=up", allow_redirects=False, timeout=30, headers=headers)
-        if req.status_code == 200:
-            return True
-        else:
-            return False
-
     def get_course_yjs(self):
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'            
@@ -394,6 +456,11 @@ class User:
         if req.status_code == 302:
             req = self.s.get("https://sso.dlut.edu.cn/cas/login?service=http://202.118.65.123/gmis/LoginCAS.aspx", timeout=30, headers=headers)
             req = self.s.get(url_course, allow_redirects=False)
+        if req.status_code == 200:
+            self.cookies_save()
+        else:
+            return False
+
         soup = BeautifulSoup(req.text, "html.parser")
         tr_list = soup.select("#MainWork_dgData tr")[1:]
         course_list = []
@@ -531,9 +598,13 @@ class User:
         if req.status_code == 302:
             req = self.s.get("https://sso.dlut.edu.cn/cas/login?service=http://202.118.65.123/gmis/LoginCAS.aspx", timeout=30)
             req = self.s.get(url_evaluate_list, allow_redirects=False)
-        soup = BeautifulSoup(req.text, "html.parser")
-        evaluate_list = []
+        if req.status_code == 200:
+            self.cookies_save()
+        else:
+            return False
 
+        evaluate_list = []
+        soup = BeautifulSoup(req.text, "html.parser")
         list_tr = soup.select('#MainWork_dgData tr')[1:]
         for index, course in enumerate(list_tr):
             soup = BeautifulSoup(str(course), 'html.parser')
@@ -580,6 +651,11 @@ class User:
         if req.status_code == 302:
             req = self.s.get("https://sso.dlut.edu.cn/cas/login?service=http://202.118.65.123/gmis/LoginCAS.aspx", timeout=30)
             req = self.s.get(url_evaluate_list, allow_redirects=False)
+        if req.status_code == 200:
+            self.cookies_save()
+        else:
+            return False
+        
         soup = BeautifulSoup(req.text, "html.parser")
         __VIEWSTATE = soup.select("#__VIEWSTATE")[0]['value']
         __VIEWSTATEGENERATOR = soup.select('#__VIEWSTATEGENERATOR')[0]['value']
@@ -673,81 +749,24 @@ class User:
             iprint(info)
             return False
 
-    
-    def get_network(self):
-        req = self.s.get('https://portal.dlut.edu.cn/tp/view?m=up')
-        url_info = 'https://portal.dlut.edu.cn/tp/up/subgroup/getTrafficList'
-        data = {}
+    def logout(self, clear_save=False, path="./"):
+        self.s.cookies.clear()
+        if clear_save:
+            filename = os.path.join(path, "cookies_dutsso_"+self.username+".coo")
+            if os.path.exists(filename):
+                os.remove(filename)
+                return
+        return
+
+    def isactive(self):
         headers = {
-            'Content-Type': 'application/json;charset=UTF-8',
-            'Origin': 'http://portal.dlut.edu.cn',
-            'Referer': 'http://portal.dlut.edu.cn/tp/view?m=up',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36',
         }
-        req = self.s.post(url_info, data=json.dumps(data), headers=headers)
-        info_dict = json.loads(req.text)[0]
-        info = {
-            'fee': info_dict['fee'],
-            'used': info_dict['usedTraffic']
-        }
-        return info
-
-    def get_email(self):
-        req = self.s.get('https://portal.dlut.edu.cn/tp/view?m=up')
-        url_info = 'https://portal.dlut.edu.cn/tp/up/subgroup/getUnReadList'
-        data = {}
-        headers = {
-            'Content-Type': 'application/json;charset=UTF-8',
-            'Origin': 'http://portal.dlut.edu.cn',
-            'Referer': 'http://portal.dlut.edu.cn/tp/view?m=up',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'
-        }
-        req = self.s.post(url_info, data=json.dumps(data), headers=headers)
-        info_dict = json.loads(req.text)
-        info = {
-            'email': info_dict['email'],
-            'unread': info_dict['num']
-        }
-        return info
-
-    def get_job(self, search_date=None):
-        if not search_date:
-            now = time.localtime(time.time())
-            year = now.tm_year
-            month = now.tm_mon
-            day = now.tm_mday
-            search_date = "%d-%02d-%d" % (year, month, day)
-        job_url = "http://202.118.65.2/app/portals/recruiterNews?date=" + search_date
-        jobs = json.loads(requests.get(job_url).text)
-        jobs_list = []
-        for i in jobs:
-            i_url = "http://202.118.65.2/app/portals/newspage.html?id=" + i['id']
-            detail = requests.get(i_url)
-            soup = BeautifulSoup(detail.text, 'html.parser')
-            th = soup.select('table th')
-            try:
-                i_addr = th[0].text.strip("场地地址：")
-            except:
-                i_addr = ""
-            try:
-                i_date = th[1].text.strip("日期：")
-            except:
-                i_date = ""
-            try:
-                i_time = th[2].text.strip("时间：")
-            except:
-                i_time = ""
-            job_dict = {
-                'title': i['title'],
-                'url': i_url,
-                'location': i_addr,
-                'date': i_date,
-                'time': i_time,
-            }
-            jobs_list.append(job_dict)
-        jobs_list_sorted = sorted(jobs_list, key=itemgetter("date", "time"))
-        return jobs_list_sorted
-
+        req = self.s.get("https://portal.dlut.edu.cn/tp/view?m=up", allow_redirects=False, timeout=30, headers=headers)
+        if req.status_code == 200:
+            return True
+        else:
+            return False
 
 
 class Mail:

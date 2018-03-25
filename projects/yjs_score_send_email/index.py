@@ -61,10 +61,10 @@ for i in range(len(users)):
     login = u.login()
     if login:
         print(u.name + "登录成功！")
-        try:
-            scores = u.get_score_yjs()
+        scores = u.get_score_yjs()
+        if scores != False:
             cursor.execute("UPDATE Score_yjs_users SET get_success='true' WHERE username='%s'" % u.username)
-        except:
+        else:
             cursor.execute("UPDATE Score_yjs_users SET get_success='false' WHERE username='%s'" % u.username)
         conn.commit()
         if len(scores) > old_nums:
