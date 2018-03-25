@@ -64,22 +64,22 @@ for i in range(len(users)):
         scores = u.get_score_yjs()
         if scores != False:
             cursor.execute("UPDATE Score_yjs_users SET get_success='true' WHERE username='%s'" % u.username)
+            if len(scores) > old_nums:
+                back = send_email(scores, u)
+                if back:
+                    now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) 
+                    cursor.execute("UPDATE Score_yjs_users SET score_nums='%d', new_times=new_times+1, send_success='true', update_time='%s' WHERE username='%s'" 
+                        % (len(scores), now, u.username))
+                    print("邮件发送成功！")
+                else:
+                    cursor.execute("UPDATE Score_yjs_users SET send_success='false' WHERE username='%s'" % u.username)                
+                    print("邮件发送失败")
+                conn.commit()
+            else:
+                print("未发现新成绩！")
         else:
             cursor.execute("UPDATE Score_yjs_users SET get_success='false' WHERE username='%s'" % u.username)
         conn.commit()
-        if len(scores) > old_nums:
-            back = send_email(scores, u)
-            if back:
-                now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) 
-                cursor.execute("UPDATE Score_yjs_users SET score_nums='%d', new_times=new_times+1, send_success='true', update_time='%s' WHERE username='%s'" 
-                    % (len(scores), now, u.username))
-                print("邮件发送成功！")
-            else:
-                cursor.execute("UPDATE Score_yjs_users SET send_success='false' WHERE username='%s'" % u.username)                
-                print("邮件发送失败")
-            conn.commit()
-        else:
-            print("未发现新成绩！")
     else:
         cursor.execute("UPDATE Users SET success='false' WHERE username='%s'" % u.username)
         print("用户名密码错误！")
