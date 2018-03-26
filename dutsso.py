@@ -256,22 +256,46 @@ class User:
         }
         req = self.s.post(url_lib_login, data=data, allow_redirects=False, timeout=30)
         
-        url_lib_info = "http://opac.lib.dlut.edu.cn/reader/redr_info_rule.php"
-        req = self.s.get(url_lib_info, timeout=30)
-        soup = BeautifulSoup(req.content.decode('utf-8'), 'html.parser')
-        myinfo = soup.select('#mylib_content table tr')
         try:
+            url_lib_home = "http://opac.lib.dlut.edu.cn/reader/redr_info.php"
+            req = self.s.get(url_lib_home, timeout=30)
+            soup = BeautifulSoup(req.content.decode('utf-8'), 'html.parser')
+            overdue_nums = soup.select('.infobox-data-number')[0].text
+            available_nums = soup.select('.infobox-data-number')[2].text
+
+            url_lib_info = "http://opac.lib.dlut.edu.cn/reader/redr_info_rule.php"
+            req = self.s.get(url_lib_info, timeout=30)
+            soup = BeautifulSoup(req.content.decode('utf-8'), 'html.parser')
+            myinfo = soup.select('#mylib_content table tr')
             borrow_times = myinfo[3].select('td')[2].text.strip("累计借书：").strip("册次")
             break_times = myinfo[4].select('td')[0].text.strip("违章次数：")
             break_money = myinfo[4].select('td')[1].text.strip("欠款金额：")
             bind_email = myinfo[5].select('td')[0].text.strip("Email：").strip()
             bind_phone = myinfo[7].select('td')[3].text.strip("手机：").strip()
+
+            url_lib_book = "http://opac.lib.dlut.edu.cn/reader/book_lst.php"
+            req = self.s.get(url_lib_book, timeout=30)
+            soup = BeautifulSoup(req.content.decode('utf-8'), 'html.parser')
+            mybook = soup.select('#mylib_content table tr')[1:]
+            borrow_list = []
+            for i in mybook:
+                book_dict = {
+                    'name': i.select('td')[1].text.strip(),
+                    'borrow_date': i.select('td')[2].text.strip(),
+                    'before_date': i.select('td')[3].text.strip(),
+                    'renew_times': i.select('td')[4].text.strip(),
+                    'location': i.select('td')[5].text.strip(),
+                }
+                borrow_list.append(book_dict)
             lib_dict = {
-                "times": borrow_times,
-                "break": break_times,
-                "money": break_money,
+                "borrow_times": borrow_times,
+                "break_times": break_times,
+                "break_money": break_money,
+                "overdue_nums": overdue_nums,
+                "available_nums": available_nums,
                 "email": bind_email,
-                "phone": bind_phone
+                "phone": bind_phone,
+                'current_borrow': borrow_list
             }
             return lib_dict
         except:
