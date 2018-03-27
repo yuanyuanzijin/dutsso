@@ -10,12 +10,14 @@ QQ群：344247954（DUT AI Lab），大连理工大学程序员聚集地，欢�
 
 
 
-最新公告
+重要公告
 ==============
 
-V0.9.0加入密文登录，以提高信息的安全性，如需储存账号密码，请使用密文方式。使用方法请参考examples文件夹中的 `encrypt_basic <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/-2_encrypt_basic.py>`_ ！
+V0.10.0 加入查询本科成绩的方法
 
-V0.8.0加入邮箱类，方便开发者发送邮件。
+V0.9.0 加入密文登录，以提高信息的安全性，如需储存账号密码，请使用密文方式。使用方法请参考examples文件夹中的 `encrypt_basic <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/-2_encrypt_basic.py>`_ ！
+
+V0.8.0 加入邮箱类，方便开发者发送邮件。
 
 
 安装
