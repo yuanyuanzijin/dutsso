@@ -400,7 +400,97 @@ class User:
         self.cookies_save()
         iprint("研究生管理系统激活成功！已保存登录状态！")
         return True
+    
+    def get_score_bks(self, course_type="all", recently=False):
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'            
+        }
+        req = self.s.get("https://portal.dlut.edu.cn/sso/sso_jw.jsp", timeout=30, headers=headers)
+        soup = BeautifulSoup(req.text, "html.parser")
+        verify = soup.select("#verify")[0]['value']
+        input_time = soup.select('#time')[0]['value']
+
+        jwc_url = "http://zhjw.dlut.edu.cn/"
+        data = {
+            'logintype': '',
+            'un': self.username,
+            'verify': verify,
+            'time': input_time
+        }
+        back = self.s.post(jwc_url, data=data, headers=headers)
+
+        score_list = []
+
+        if recently:
+            score_recently_url = "http://zhjw.dlut.edu.cn/bxqcjcxAction.do"
+            back = self.s.get(score_recently_url, headers=headers)
+            soup = BeautifulSoup(back.text, "html.parser")
+            scores = soup.select('table.titleTop2')[0]
+            scores_tr = scores.select('table tr')[1:-1]
+            for i in scores_tr:
+                tds = i.select('td')
+                c_type = tds[5].text.strip()
+                c_dict = {
+                    'c_name': tds[2].text.strip(),
+                    'c_score': tds[4].text.strip(),
+                    'c_value': tds[6].text.strip(),
+                    'c_type': c_type
+                }
+                if course_type == "all" or course_type == "bx":
+                    if c_type == "必修":
+                        score_list.append(c_dict)
+                if course_type == "all" or course_type == "xx":
+                    if c_type == "选修":
+                        score_list.append(c_dict)
+                if course_type == "all" or course_type == "rx":
+                    if c_type == "任选":
+                        score_list.append(c_dict)
+
+        else:
+            score_url = "http://zhjw.dlut.edu.cn/gradeLnAllAction.do?type=ln&oper=sxinfo&lnsxdm=001"
+            back = self.s.get(score_url, headers=headers)
+            soup = BeautifulSoup(back.text, "html.parser")
             
+            if course_type == "all" or course_type == "bx":
+                bx_scores = soup.select('table.titleTop2')[0]
+                bx_scores_tr = bx_scores.select('table tr')[1:-1]
+                for i in bx_scores_tr:
+                    tds = i.select('td')
+                    c_dict = {
+                        'c_name': tds[2].text.strip(),
+                        'c_score': tds[4].text.strip(),
+                        'c_value': tds[6].text.strip(),
+                        'c_type': tds[5].text.strip()
+                    }
+                    score_list.append(c_dict)
+
+            if course_type == "all" or course_type == "xx":
+                xx_scores = soup.select('table.titleTop2')[1]
+                xx_scores_tr = xx_scores.select('table tr')[1:-1]
+                for i in xx_scores_tr:
+                    tds = i.select('td')
+                    c_dict = {
+                        'c_name': tds[2].text.strip(),
+                        'c_score': tds[4].text.strip(),
+                        'c_value': tds[6].text.strip(),
+                        'c_type': tds[5].text.strip()
+                    }
+                    score_list.append(c_dict)
+
+            if course_type == "all" or course_type == "rx":
+                rx_scores = soup.select('table.titleTop2')[2]
+                rx_scores_tr = rx_scores.select('table tr')[1:-1]
+                for i in rx_scores_tr:
+                    tds = i.select('td')
+                    c_dict = {
+                        'c_name': tds[2].text.strip(),
+                        'c_score': tds[4].text.strip(),
+                        'c_value': tds[6].text.strip(),
+                        'c_type': tds[5].text.strip()
+                    }
+                    score_list.append(c_dict)
+
+        return score_list
 
     def get_score_yjs(self):
         score_url = 'http://202.118.65.123/pyxx/grgl/xskccjcx.aspx?xh=%s' % self.username

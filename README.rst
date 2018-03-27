@@ -74,6 +74,8 @@ User类
 
 * 获取大工就业网招聘信息 User.get_job()
 
+* 获取本科成绩 User.get_score_bks()
+
 
 Mail类
 ----------------
@@ -110,6 +112,8 @@ Mail类
 * `获取图书馆借书信息 <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/5_get_library.py>`_
 
 * `获取浴室实时人数信息 <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/6_get_bathroom.py>`_
+
+* `获取成绩（本科生） <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/11_bks_get_score.py>`_
 
 * `获取培养计划（研究生） <https://github.com/yuanyuanzijin/dutsso/blob/master/examples/21_yjs_get_plan.py>`_
 
