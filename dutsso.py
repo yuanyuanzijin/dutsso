@@ -344,7 +344,7 @@ class User:
             year = now.tm_year
             month = now.tm_mon
             day = now.tm_mday
-            search_date = "%d-%02d-%d" % (year, month, day)
+            search_date = "%d-%02d-%02d" % (year, month, day)
         job_url = "http://202.118.65.2/app/portals/recruiterNews?date=" + search_date
         jobs = json.loads(requests.get(job_url).text)
         jobs_list = []
