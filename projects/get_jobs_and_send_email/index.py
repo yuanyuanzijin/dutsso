@@ -8,7 +8,7 @@ import sys
 import dutsso
 
 now = time.localtime(time.time())
-search_date = "%d-%02d-%d" % (now.tm_year, now.tm_mon, now.tm_mday)
+search_date = "%d-%02d-%02d" % (now.tm_year, now.tm_mon, now.tm_mday)
 
 # 查询招聘信息
 u = dutsso.User()
