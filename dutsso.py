@@ -833,6 +833,12 @@ class User:
         __VIEWSTATE = soup.select("#__VIEWSTATE")[0]['value']
         __VIEWSTATEGENERATOR = soup.select('#__VIEWSTATEGENERATOR')[0]['value']
 
+        choice_list = []
+        questions = soup.select('td.ex2 span.ex2')
+        for question in questions:
+            choice = question.select('input')[0]['value']
+            choice_list.append(choice)
+
         if choice_exam == "A" or choice_exam == "a":
             choice_exam_id = "rdoksfs_bjks"
         elif choice_exam == "B" or choice_exam == "b":
@@ -841,15 +847,18 @@ class User:
             choice_exam_id = "rdoksfs_dzyfs"
         else:
             choice_exam_id = "rdoksfs_qtfs"
+        
+        question_whole = soup.select("#MainWork_radlztpj input")
+        question_whole_list = [q['value'] for q in question_whole]
 
         if choice_whole == "A" or choice_whole == "a":
-            choice_whole_id = 322
+            choice_whole_id = question_whole_list[0]
         elif choice_whole == "B" or choice_whole == "b":
-            choice_whole_id = 323
+            choice_whole_id = question_whole_list[1]
         elif choice_whole == "C" or choice_whole == "c":
-            choice_whole_id = 324
+            choice_whole_id = question_whole_list[2]
         else:
-            choice_whole_id = 325
+            choice_whole_id = question_whole_list[3]
 
         data = {
             "ctl00$ScriptManager1": "ctl00$MainWork$UpdatePanel|ctl00$MainWork$cmdAdd",
@@ -861,22 +870,22 @@ class User:
             "ctl00$MainWork$hfpjid": e_id,
             "ctl00$MainWork$ksfs": choice_exam_id,
             "ctl00$MainWork$zyskfs": "rdozyskfs_ktsk",
-            "ctl00$MainWork$dltm_jxtd$ctl00$radlda": 261,
-            "ctl00$MainWork$dltm_jxtd$ctl01$radlda": 264,
-            "ctl00$MainWork$dltm_jxtd$ctl02$radlda": 267,
-            "ctl00$MainWork$dltm_jxtd$ctl03$radlda": 271,
-            "ctl00$MainWork$dltm_jxtd$ctl04$radlda": 276,
-            "ctl00$MainWork$dltm_jxtd$ctl05$radlda": 280,
-            "ctl00$MainWork$dltm_jxnr$ctl00$radlda": 284,
-            "ctl00$MainWork$dltm_jxnr$ctl01$radlda": 286,
-            "ctl00$MainWork$dltm_jxnr$ctl02$radlda": 290,
-            "ctl00$MainWork$dltm_jxff$ctl00$radlda": 294,
-            "ctl00$MainWork$dltm_jxff$ctl01$radlda": 298,
-            "ctl00$MainWork$dltm_jxff$ctl02$radlda": 302,
-            "ctl00$MainWork$dltm_jxff$ctl03$radlda": 306,
-            "ctl00$MainWork$dltm_jxxg$ctl00$radlda": 310,
-            "ctl00$MainWork$dltm_jxxg$ctl01$radlda": 314,
-            "ctl00$MainWork$dltm_jxxg$ctl02$radlda": 318,
+            "ctl00$MainWork$dltm_jxtd$ctl00$radlda": choice_list[0],
+            "ctl00$MainWork$dltm_jxtd$ctl01$radlda": choice_list[1],
+            "ctl00$MainWork$dltm_jxtd$ctl02$radlda": choice_list[2],
+            "ctl00$MainWork$dltm_jxtd$ctl03$radlda": choice_list[3],
+            "ctl00$MainWork$dltm_jxtd$ctl04$radlda": choice_list[4],
+            "ctl00$MainWork$dltm_jxtd$ctl05$radlda": choice_list[5],
+            "ctl00$MainWork$dltm_jxnr$ctl00$radlda": choice_list[6],
+            "ctl00$MainWork$dltm_jxnr$ctl01$radlda": choice_list[7],
+            "ctl00$MainWork$dltm_jxnr$ctl02$radlda": choice_list[8],
+            "ctl00$MainWork$dltm_jxff$ctl00$radlda": choice_list[9],
+            "ctl00$MainWork$dltm_jxff$ctl01$radlda": choice_list[10],
+            "ctl00$MainWork$dltm_jxff$ctl02$radlda": choice_list[11],
+            "ctl00$MainWork$dltm_jxff$ctl03$radlda": choice_list[12],
+            "ctl00$MainWork$dltm_jxxg$ctl00$radlda": choice_list[13],
+            "ctl00$MainWork$dltm_jxxg$ctl01$radlda": choice_list[14],
+            "ctl00$MainWork$dltm_jxxg$ctl02$radlda": choice_list[15],
             "ctl00$MainWork$txtbz": remark_text,
             "ctl00$MainWork$radlztpj": choice_whole_id,
             "ctl00$MainWork$txtrkjspm": rank,
