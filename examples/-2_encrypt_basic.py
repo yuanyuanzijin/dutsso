@@ -8,7 +8,7 @@ import dutsso
 username = input("请输入学号：")
 password = getpass.getpass("请输入密码：")
 u = dutsso.User(username=username, password=password)
-login = u.login()
+login = u.login(try_cookies=False)
 if not login:
     print("用户名或密码错误！")
     exit(-1)

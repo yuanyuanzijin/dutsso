@@ -29,6 +29,11 @@ class User:
         rsa = ctx.call('strEnc', username + password + ticket, '1', '2', '3')
         return rsa
     
+    def __get_opt_id(self):
+        ctx = execjs.compile(htmlstr)
+        opt_id = ctx.call('strEnc', self.username, 'tp', 'des', 'param')
+        return opt_id
+    
     def get_encrypted_password(self):
         if self.password:
             encrypted_password = self.__get_key("", self.password, "")
@@ -172,10 +177,9 @@ class User:
 
     def get_all_info(self):
         req = self.s.get('http://portal.dlut.edu.cn/tp/view?m=up')
-        url_info = 'https://portal.dlut.edu.cn/tp/sys/uacm/profile/get'
+        url_info = 'https://portal.dlut.edu.cn/tp/sys/uacm/profile/getUserById'
         data = {
-            "ID_NUMBER": self.username,
-            "mapping": "getUserById"
+            "BE_OPT_ID": self.__get_opt_id()
         }
         headers = {
             'Content-Type': 'application/json;charset=UTF-8',
@@ -191,8 +195,7 @@ class User:
             'depart': info_dict['UNIT_NAME'],
             'sex': info_dict['USER_SEX'],
             'home': info_dict['NATIVE_PLACE'],
-            'mobile': info_dict['MOBILE'],
-            'email': info_dict['EMAIL']
+            'avatar': 'https://portal.dlut.edu.cn/tp/' + info_dict['CARD_AVATAR']
         }
         return info
 

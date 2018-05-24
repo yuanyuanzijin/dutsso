@@ -17,7 +17,6 @@ if login:
     print("类别：" + user_info['type'])
     print("学部（院）：" + user_info['depart'])
     print("籍贯：" + user_info['home'])
-    print("手机：" + user_info['mobile'])
-    print("邮箱：" + user_info['email'])
+    print("证件照：" + user_info['avatar'])
 else:
     print("用户名密码错误！")
