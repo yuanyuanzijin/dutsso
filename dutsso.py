@@ -19,11 +19,14 @@ class User:
         self.username = username
         self.password = password
         self.encrypted_password = encrypted_password
-        self.password_length = password_length
         self.name = ""
         self.type = ""
         self.s = requests.Session()
-    
+
+        # V0.10.4加入的警告信息
+        if password_length:
+            wprint("V0.10.4之后的版本密文登录已不需要传入password_length变量。")  
+
     def __get_key(self, username, password, ticket):  
         ctx = execjs.compile(htmlstr)
         rsa = ctx.call('strEnc', username + password + ticket, '1', '2', '3')
@@ -34,6 +37,11 @@ class User:
         opt_id = ctx.call('strEnc', self.username, 'tp', 'des', 'param')
         return opt_id
     
+    def __get_pw(self, encrypted_password):
+        ctx = execjs.compile(htmlstr)
+        password = ctx.call('strDec', encrypted_password, '1', '2', '3')
+        return password
+
     def get_encrypted_password(self):
         if self.password:
             encrypted_password = self.__get_key("", self.password, "")
@@ -86,6 +94,7 @@ class User:
     def login(self, try_cookies=True, try_rsa=True, auto_save=True, show_info=True):
         if not self.username:
             eprint("请初始化学号！")
+            self.username = input("请输入您的学号：")
         if try_cookies:
             result = self.cookies_restore()
             if result:
@@ -111,10 +120,10 @@ class User:
         ticket = soup.select('#lt')[0]['value']
         execution = soup.select('input')[4]['value']
 
-        if try_rsa and self.encrypted_password and self.password_length:
+        if try_rsa and self.encrypted_password:
             iprint("正在使用密文密码登录...", show_info)
             rsa = self.__get_key(self.username, "", "") + self.encrypted_password + self.__get_key("", "", ticket)
-            pl = self.password_length
+            pl = len(self.__get_pw(self.encrypted_password))
         else:
             iprint("正在使用用户名密码登录...", show_info)
             rsa = self.__get_key(self.username, self.password, ticket)
@@ -188,16 +197,20 @@ class User:
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'
         }
         req = self.s.post(url_info, data=json.dumps(data), headers=headers)
-        info_dict = json.loads(req.text)
-        info = {
-            'name': info_dict['USER_NAME'],
-            'type': info_dict['ID_TYPE'],
-            'depart': info_dict['UNIT_NAME'],
-            'sex': info_dict['USER_SEX'],
-            'home': info_dict['NATIVE_PLACE'],
-            'avatar': 'https://portal.dlut.edu.cn/tp/' + info_dict['CARD_AVATAR']
-        }
-        return info
+        try:
+            info_dict = json.loads(req.text)
+            info = {
+                'name': info_dict['USER_NAME'],
+                'type': info_dict['ID_TYPE'],
+                'depart': info_dict['UNIT_NAME'],
+                'sex': info_dict['USER_SEX'],
+                'home': info_dict['NATIVE_PLACE'],
+                'avatar': 'https://portal.dlut.edu.cn/tp/' + info_dict['CARD_AVATAR']
+            }
+            return info
+        except:
+            eprint("信息获取失败，请重试！如依然无法成功，可能是接口更新所致，请提交反馈。")
+            return False
 
     def get_card(self):
         url_card = "http://202.118.64.15/fabu/sso_jump.jsp"
@@ -302,7 +315,7 @@ class User:
             }
             return lib_dict
         except:
-            iprint("您的图书馆信息未激活，请登录图书馆后再试！")
+            eprint("您的图书馆信息未激活，请在网页登录图书馆后再试！")
             return False
 
     def get_network(self):
@@ -982,10 +995,13 @@ class Mail:
 
 def iprint(info, show_info=True):
     if show_info:
-          print("Info: " + info)
+          print("Info: %s" % info)
 
 def eprint(info):
-    print("Error: " + info)
+    print("\033[1;31mError: %s\033[0m" % info)
+
+def wprint(info):
+    print("\033[1;33mWarning: %s\033[0m" % info)
 
 
 
