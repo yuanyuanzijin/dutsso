@@ -50,7 +50,6 @@ for i in range(len(users)):
     u = dutsso.User()
     u.username = users[i]['username']
     u.encrypted_password = users[i]['encrypted_password']
-    u.password_length = users[i]['password_length']
 
     u.emailaddr = users[i]['email']
     u.first_use = True if users[i]['score_nums'] == None else False

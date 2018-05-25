@@ -82,7 +82,7 @@ while 1:
                             else:
                                 print("输入不可以为空！")
                         encrypted_password = u.get_encrypted_password()
-                        cursor.execute("INSERT INTO Users (username, encrypted_password, password_length, name, user_type, email, success) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', 'true')" % (username, encrypted_password, len(password), u.name, u.type, email))
+                        cursor.execute("INSERT INTO Users (username, encrypted_password, `name`, user_type, email, success) VALUES ('%s', '%s', '%s', '%s', '%s', 'true')" % (username, encrypted_password, u.name, u.type, email))
                         conn.commit()
                         print("用户%s创建成功！" % username)
                     else:
