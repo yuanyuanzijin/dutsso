@@ -10,6 +10,7 @@ from operator import itemgetter
 
 import smtplib
 from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from email.header import Header
 import configparser
 
@@ -942,13 +943,22 @@ class User:
 
 
 class Mail:
-    def __init__(self):
+    def __init__(self, config_path=None):
         self.init_finished = False
+        self.message = MIMEMultipart()
+        if config_path:
+            self.__init_from_file()
+        else:
+            eprint("V0.10.5之后的版本请在初始化Mail对象时传入config_path参数，以代替原init_from_file方法！")
 
-    def init_from_file(self, config_path=None):
+    def __init_from_file(self, config_path=None):
         if config_path == None:
             root_path = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
             config_path = os.path.join(root_path, "mail_config.ini")
+
+        if not os.path.isfile(config_path):
+            config_path = os.path.join(config_path, "mail_config.ini")
+            wprint("给定路径非文件！尝试使用默认文件名config.ini...")
 
         if not os.path.exists(config_path):
             eprint("请检查配置文件的路径！并请确保已将项目中的mail_config.ini.example重命名为mail_config.ini")
@@ -964,13 +974,30 @@ class Mail:
                 self.mail_pass = c.get('info', 'mail_pass')
                 self.sender = c.get('info', 'sender')
             self.init_finished = True
+            iprint("邮箱配置初始化成功！")
             return True
         except:
             eprint("mail_config.ini配置文件格式有误，请检查重试！")
             self.init_finished = False
             return False
 
-    def send(self, mailto, subject, content):
+    def __add_file(self, file_path):
+        if not os.path.exists(file_path):
+            eprint("附件路径有误：%s" % file_path)
+            return False
+        if not os.path.isfile(file_path):
+            eprint("附件路径应该是文件，不是文件夹：%s" % file_path)
+            return False
+
+        filename = os.path.basename(file_path)
+        attachment = MIMEText(open(file_path, 'rb').read(), 'base64', 'utf-8')
+        attachment["Content-Type"] = 'application/octet-stream'
+        attachment["Content-Disposition"] = 'attachment; filename="%s"' % filename
+        self.message.attach(attachment)
+        iprint("附件添加成功：%s" % file_path)
+        return True
+
+    def send(self, mailto, subject, content, attachment=[]):
         if not self.init_finished:
             eprint("请先使用init_from_file方法初始化邮件配置！")
             return False
@@ -979,19 +1006,30 @@ class Mail:
             receivers = [mailto]
         else:
             receivers = mailto
-        mail_msg = content
-        m = MIMEText(mail_msg, 'html', 'utf-8')
-        m['From'] = self.sender
-        m['To'] = ";".join(receivers)
-        m['Subject'] = Header(subject, 'utf-8')
+
+        if type(attachment) == str:
+            attachment = [attachment]
+
+        self.message['From'] = self.sender
+        self.message['To'] = ";".join(receivers)
+        self.message['Subject'] = Header(subject, 'utf-8')
+        self.message.attach(MIMEText(content, 'html', 'utf-8'))
+
+        for f in attachment:
+            if not self.__add_file(f):
+                return False
+
         try:
             smtpObj = smtplib.SMTP_SSL()
             smtpObj.connect(self.mail_host, self.mail_port)
             smtpObj.login(self.mail_user, self.mail_pass)
-            smtpObj.sendmail(self.sender, receivers, m.as_string())
+            smtpObj.sendmail(self.sender, receivers, self.message.as_string())
+            for receive in receivers:
+                iprint("%s 邮件发送成功！" % receive)
             return True
         except smtplib.SMTPException:
             return False
+
 
 def iprint(info, show_info=True):
     if show_info:
