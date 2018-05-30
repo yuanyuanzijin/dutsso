@@ -35,8 +35,7 @@ def dict_factory(cursor, row):
     return d  
 
 config_path = os.path.join('mail_config.ini')
-m = dutsso.Mail()
-m.init_from_file(config_path)
+m = dutsso.Mail(config_path)
 
 db_path = os.path.join("users.db")
 conn = sqlite3.connect(db_path)

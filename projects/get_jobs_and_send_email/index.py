@@ -29,12 +29,9 @@ subject = "%s招聘信息汇总" % search_date
 content = init_content(search_date, jobs)
 config_path = os.path.join('mail_config.ini')
 
-m = dutsso.Mail()
-m.init_from_file(config_path)
+m = dutsso.Mail(config_path)
 
 mail_list_path = os.path.join(sys.path[0], "mail_list.txt")
 with open(mail_list_path) as f:
     emails = ["<%s>" % l.strip() for l in f.readlines()]
-back = m.send(emails, subject, content)
-if back:
-    print("发送成功！")
+m.send(emails, subject, content)
