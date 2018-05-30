@@ -6,7 +6,8 @@ import os
 import dutsso
 
 # 创建Mail对象并初始化邮箱配置
-m = dutsso.Mail(config_path='mail_config.ini')
+config_path = 'mail_config.ini'
+m = dutsso.Mail(config_path)        # config_path为空时默认为代码所在目录下的mail_config.ini文件
 
 # 发送邮件
 subject = "欢迎使用dutsso"

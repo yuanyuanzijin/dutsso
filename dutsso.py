@@ -945,24 +945,22 @@ class User:
 class Mail:
     def __init__(self, config_path=None):
         self.init_finished = False
-        self.message = MIMEMultipart()
-        if config_path:
-            self.__init_from_file()
-        else:
-            eprint("V0.10.5之后的版本请在初始化Mail对象时传入config_path参数，以代替原init_from_file方法！")
-
-    def __init_from_file(self, config_path=None):
+        
         if config_path == None:
             root_path = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
             config_path = os.path.join(root_path, "mail_config.ini")
+            iprint("尝试使用默认配置文件路径mail_config.ini...")
+            wprint("V0.10.5之后的版本请在初始化Mail对象时传入config_path参数，以代替原init_from_file方法！")
+        self.__init_from_file(config_path)
 
-        if not os.path.isfile(config_path):
-            config_path = os.path.join(config_path, "mail_config.ini")
-            wprint("给定路径非文件！尝试使用默认文件名config.ini...")
-
+    def __init_from_file(self, config_path=None):
         if not os.path.exists(config_path):
             eprint("请检查配置文件的路径！并请确保已将项目中的mail_config.ini.example重命名为mail_config.ini")
             return False
+        
+        if not os.path.isfile(config_path):
+            config_path = os.path.join(config_path, "mail_config.ini")
+            wprint("给定路径非文件！尝试使用默认文件名mail_config.ini...")
 
         c = configparser.ConfigParser()
         try:
@@ -999,9 +997,8 @@ class Mail:
 
     def send(self, mailto, subject, content, attachment=[]):
         if not self.init_finished:
-            eprint("请先使用init_from_file方法初始化邮件配置！")
+            eprint("邮箱配置初始化未完成，无法发送！")
             return False
-
         if type(mailto) == str:
             receivers = [mailto]
         else:
@@ -1009,7 +1006,8 @@ class Mail:
 
         if type(attachment) == str:
             attachment = [attachment]
-
+        
+        self.message = MIMEMultipart()
         self.message['From'] = self.sender
         self.message['To'] = ";".join(receivers)
         self.message['Subject'] = Header(subject, 'utf-8')
