@@ -358,10 +358,8 @@ class User:
     def get_job(self, search_date=None):
         if not search_date:
             now = time.localtime(time.time())
-            year = now.tm_year
-            month = now.tm_mon
-            day = now.tm_mday
-            search_date = "%d-%02d-%02d" % (year, month, day)
+            search_date = time.strftime("%Y-%m-%d", now)
+            print(search_date)
         job_url = "http://202.118.65.2/app/portals/recruiterNews?date=" + search_date
         jobs = json.loads(requests.get(job_url).text)
         jobs_list = []
@@ -370,18 +368,20 @@ class User:
             detail = requests.get(i_url)
             soup = BeautifulSoup(detail.text, 'html.parser')
             th = soup.select('table th')
-            try:
+            th2 = soup.select('.title-border span span')
+            if th:
                 i_addr = th[0].text.strip("场地地址：")
-            except:
-                i_addr = ""
-            try:
                 i_date = th[1].text.strip("日期：")
-            except:
-                i_date = ""
-            try:
                 i_time = th[2].text.strip("时间：")
-            except:
+            elif th2:
+                i_addr = th2[0].text.strip()
+                i_date = th2[1].text.strip()
+                i_time = th2[2].text.strip()
+            else:
+                i_addr = ""
+                i_date = ""
                 i_time = ""
+
             job_dict = {
                 'title': i['title'],
                 'url': i_url,
