@@ -130,7 +130,7 @@ class User:
             rsa = self.__get_key(self.username, self.password, ticket)
             pl = len(self.password)
         ul = len(self.username)
-        jsessionid = self.s.cookies['JSESSIONID']
+        jsessionid = self.s.cookies['JSESSIONIDCAS']
 
         url2 = "https://sso.dlut.edu.cn/cas/login;jsessionid=%s?service=http://portal.dlut.edu.cn/tp/" % jsessionid
         data = {
@@ -356,42 +356,46 @@ class User:
         return info
 
     def get_job(self, search_date=None):
-        if not search_date:
-            now = time.localtime(time.time())
-            search_date = time.strftime("%Y-%m-%d", now)
-            print(search_date)
-        job_url = "http://202.118.65.2/app/portals/recruiterNews?date=" + search_date
-        jobs = json.loads(requests.get(job_url).text)
-        jobs_list = []
-        for i in jobs:
-            i_url = "http://202.118.65.2/app/portals/newspage.html?id=" + i['id']
-            detail = requests.get(i_url)
-            soup = BeautifulSoup(detail.text, 'html.parser')
-            th = soup.select('table th')
-            th2 = soup.select('.title-border span span')
-            if th:
-                i_addr = th[0].text.strip("场地地址：")
-                i_date = th[1].text.strip("日期：")
-                i_time = th[2].text.strip("时间：")
-            elif th2:
-                i_addr = th2[0].text.strip()
-                i_date = th2[1].text.strip()
-                i_time = th2[2].text.strip()
-            else:
-                i_addr = ""
-                i_date = ""
-                i_time = ""
+        try:
+            if not search_date:
+                now = time.localtime(time.time())
+                search_date = time.strftime("%Y-%m-%d", now)
+                print(search_date)
+            job_url = "http://202.118.65.2/app/portals/recruiterNews?date=" + search_date
+            jobs = json.loads(requests.get(job_url).text)
+            jobs_list = []
+            for i in jobs:
+                i_url = "http://202.118.65.2/app/portals/newspage.html?id=" + i['id']
+                detail = requests.get(i_url)
+                soup = BeautifulSoup(detail.text, 'html.parser')
+                th = soup.select('table th')
+                th2 = soup.select('.title-border span span')
+                if th:
+                    i_addr = th[0].text.strip("场地地址：")
+                    i_date = th[1].text.strip("日期：")
+                    i_time = th[2].text.strip("时间：")
+                elif th2:
+                    i_addr = th2[0].text.strip()
+                    i_date = th2[1].text.strip()
+                    i_time = th2[2].text.strip()
+                else:
+                    i_addr = ""
+                    i_date = ""
+                    i_time = ""
 
-            job_dict = {
-                'title': i['title'],
-                'url': i_url,
-                'location': i_addr,
-                'date': i_date,
-                'time': i_time,
-            }
-            jobs_list.append(job_dict)
-        jobs_list_sorted = sorted(jobs_list, key=itemgetter("date", "time"))
-        return jobs_list_sorted
+                job_dict = {
+                    'title': i['title'],
+                    'url': i_url,
+                    'location': i_addr,
+                    'date': i_date,
+                    'time': i_time,
+                }
+                jobs_list.append(job_dict)
+            jobs_list_sorted = sorted(jobs_list, key=itemgetter("date", "time"))
+            return  jobs_list_sorted
+
+        except Exception as e:
+            eprint(e)
 
     def active_yjs(self):
         headers = {
