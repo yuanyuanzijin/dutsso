@@ -28,20 +28,24 @@ class User:
         if password_length:
             wprint("V0.10.4之后的版本密文登录已不需要传入password_length变量。")  
 
+
     def __get_key(self, username, password, ticket):  
         ctx = execjs.compile(htmlstr)
         rsa = ctx.call('strEnc', username + password + ticket, '1', '2', '3')
         return rsa
     
+
     def __get_opt_id(self):
         ctx = execjs.compile(htmlstr)
         opt_id = ctx.call('strEnc', self.username, 'tp', 'des', 'param')
         return opt_id
     
+
     def __get_pw(self, encrypted_password):
         ctx = execjs.compile(htmlstr)
         password = ctx.call('strDec', encrypted_password, '1', '2', '3')
         return password
+
 
     def get_encrypted_password(self):
         if self.password:
@@ -51,6 +55,7 @@ class User:
             eprint("密码未初始化，缺少password变量，无法执行此操作！")
             return False
       
+
     def cookies_get(self):
         cookies_list = []
         for c in self.s.cookies:
@@ -63,6 +68,7 @@ class User:
             cookies_list.append(c_dict)
         return cookies_list
 
+
     def cookies_save(self, cookies_list=None, path="cookies/"):
         if not cookies_list:
             cookies_list = self.cookies_get()
@@ -73,10 +79,12 @@ class User:
             f.write(json.dumps(cookies_list))
         return True
 
+
     def cookies_set(self, cookies_list):
         for c in cookies_list:
             self.s.cookies.set(c['name'], c['value'], path=c['path'], domain=c['domain'])
         return True
+
 
     def cookies_restore(self, path='cookies/'):
         filename = os.path.join(path, "cookies_dutsso_"+self.username+".coo")
@@ -92,6 +100,7 @@ class User:
         else:
             return False
     
+
     def login(self, try_cookies=True, try_rsa=True, auto_save=True, show_info=True):
         if not self.username:
             eprint("请初始化学号！")
@@ -163,6 +172,7 @@ class User:
             iprint("用户登录失败！", show_info)
             return False
     
+
     def get_info(self):
         req = self.s.get('http://portal.dlut.edu.cn/tp/view?m=up')
         soup = BeautifulSoup(req.text, "html.parser")
@@ -184,6 +194,7 @@ class User:
             'name': name
         }
         return info
+
 
     def get_all_info(self):
         req = self.s.get('http://portal.dlut.edu.cn/tp/view?m=up')
@@ -213,6 +224,7 @@ class User:
             eprint("信息获取失败，请重试！如依然无法成功，可能是接口更新所致，请提交反馈。")
             return False
 
+
     def get_card(self):
         url_card = "http://202.118.64.15/fabu/sso_jump.jsp"
         headers = {
@@ -228,6 +240,7 @@ class User:
         }
         return info
     
+
     def get_bathroom(self):
         url_bathroom = "http://202.118.64.15/fabu/cardUserManager.do?method=queryTboxCount"
         req = self.s.get(url_bathroom, timeout=30)
@@ -319,6 +332,7 @@ class User:
             eprint("您的图书馆信息未激活，请在网页登录图书馆后再试！")
             return False
 
+
     def get_network(self):
         req = self.s.get('https://portal.dlut.edu.cn/tp/view?m=up')
         url_info = 'https://portal.dlut.edu.cn/tp/up/subgroup/getTrafficList'
@@ -337,6 +351,7 @@ class User:
         }
         return info
 
+
     def get_email(self):
         req = self.s.get('https://portal.dlut.edu.cn/tp/view?m=up')
         url_info = 'https://portal.dlut.edu.cn/tp/up/subgroup/getUnReadList'
@@ -354,6 +369,7 @@ class User:
             'unread': info_dict['num']
         }
         return info
+
 
     def get_job(self, search_date=None):
         try:
@@ -397,6 +413,7 @@ class User:
         except Exception as e:
             eprint(e)
 
+
     def active_yjs(self):
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'            
@@ -422,6 +439,7 @@ class User:
         iprint("研究生管理系统激活成功！已保存登录状态！")
         return True
     
+
     def get_score_bks(self, course_type="all", recently=False):
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'            
@@ -513,6 +531,7 @@ class User:
 
         return score_list
 
+
     def get_score_yjs(self):
         score_url = 'http://202.118.65.123/pyxx/grgl/xskccjcx.aspx?xh=%s' % self.username
         headers = {
@@ -563,6 +582,7 @@ class User:
             score_list.append(c_dict)
         return score_list
 
+
     def get_plan_yjs(self):
         plan_yjs_url = 'http://202.118.65.123/pyxx/pygl/pyjhcx.aspx?xh=%s' % self.username
         headers = {
@@ -606,6 +626,7 @@ class User:
             'teacher': soup0.select('#MainWork_Label2')[0].text.strip(),
         }
         return plan_dict
+
 
     def get_course_yjs(self):
         headers = {
@@ -673,6 +694,7 @@ class User:
             course_list.append(course_info)
         return course_list
     
+
     def get_course_not_choosed_yjs(self, other_classes=False):
         course_list = self.get_course_yjs()
         course_list_not_choosed = []
@@ -687,6 +709,7 @@ class User:
                     course_list_not_choosed.append(i)
         return course_list_not_choosed
 
+
     def get_course_choosed_yjs(self):
         course_list = self.get_course_yjs()
         course_list_choosed = []
@@ -694,6 +717,7 @@ class User:
             if i['c_choose']:
                 course_list_choosed.append(i)
         return course_list_choosed
+
 
     def choose_course_yjs(self, course_tr, method="choose", show_info=True):
         if method == "choose":
@@ -758,6 +782,7 @@ class User:
             iprint(back, show_info)
         return False
 
+
     def get_evaluate_list_yjs(self):
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'            
@@ -794,6 +819,7 @@ class User:
             evaluate_list.append(e_dict)
         return evaluate_list
 
+
     def get_evaluate_list_unfinished_yjs(self):
         evaluate_list = self.get_evaluate_list_yjs()
         evaluate_list_unfinished = []
@@ -802,6 +828,7 @@ class User:
                 evaluate_list_unfinished.append(i)
         return evaluate_list_unfinished
     
+
     def evaluate_course_yjs(self, evaluate_tr, choice_exam="A", choice_whole="A", remark_text="", rank=1):
         if not rank:
             rank = 1
@@ -926,6 +953,7 @@ class User:
             iprint(info)
             return False
 
+
     def logout(self, clear_save=False, path="./"):
         self.s.cookies.clear()
         if clear_save:
@@ -934,6 +962,7 @@ class User:
                 os.remove(filename)
                 return
         return
+
 
     def isactive(self):
         headers = {
@@ -957,6 +986,7 @@ class Mail:
             wprint("V0.10.5之后的版本请在初始化Mail对象时传入config_path参数，以代替原init_from_file方法！")
         self.__init_from_file(config_path)
 
+
     def __init_from_file(self, config_path=None):
         if not os.path.exists(config_path):
             eprint("请检查配置文件的路径！并请确保已将项目中的mail_config.ini.example重命名为mail_config.ini")
@@ -968,7 +998,7 @@ class Mail:
 
         c = configparser.ConfigParser()
         try:
-            with open(config_path) as f:
+            with open(config_path, encoding='utf-8') as f:
                 c.readfp(f)
                 self.mail_host = c.get('info', 'mail_host')
                 self.mail_port = c.get('info', 'mail_port')
@@ -978,10 +1008,12 @@ class Mail:
             self.init_finished = True
             iprint("邮箱配置初始化成功！")
             return True
-        except:
-            eprint("mail_config.ini配置文件格式有误，请检查重试！")
+        except Exception as e:
+            eprint("mail_config.ini配置文件格式有误，请检查重试！请确保为utf-8编码！")
+            print(e)
             self.init_finished = False
             return False
+
 
     def __add_file(self, file_path):
         if not os.path.exists(file_path):
@@ -998,6 +1030,7 @@ class Mail:
         self.message.attach(attachment)
         iprint("附件添加成功：%s" % file_path)
         return True
+
 
     def send(self, mailto, subject, content, attachment=[]):
         if not self.init_finished:
@@ -1037,8 +1070,10 @@ def iprint(info, show_info=True):
     if show_info:
           print("Info: %s" % info)
 
+
 def eprint(info):
     print("\033[1;31mError: %s\033[0m" % info)
+
 
 def wprint(info):
     print("\033[1;33mWarning: %s\033[0m" % info)
