@@ -391,9 +391,9 @@ class User:
                     i_date = th[1].text.strip("日期：")
                     i_time = th[2].text.strip("时间：")
                 elif th2:
-                    i_addr = th2[0].text.strip()
+                    i_addr = th2[0].text.strip("召开地点:")
                     i_date = th2[1].text.strip()
-                    i_time = th2[2].text.strip()
+                    i_time = th2[2].text.strip("召开日期:")
                 else:
                     i_addr = ""
                     i_date = ""
