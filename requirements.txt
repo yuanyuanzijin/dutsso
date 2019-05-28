@@ -1,3 +1,4 @@
 requests
 pyexecjs
 beautifulsoup4
+prettytable

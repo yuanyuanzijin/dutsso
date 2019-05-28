@@ -17,6 +17,6 @@ content = '''
 <p>Powered by ZijinAI</p>
 '''
 emailto = ["jinluyuan@vip.qq.com"]
-attachment = ["README.rst", "setup.py"]         # V0.10.5版本加入添加附件功能，可为空
+attachment = ["README.rst", "setup.py"]         # V0.10.5版本加入添加附件功能，可为空，python3.6亲测版本可用，3.7好像会报错
 
 m.send(emailto, subject, content, attachment)

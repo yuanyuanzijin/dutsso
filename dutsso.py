@@ -954,6 +954,13 @@ class User:
             return False
 
 
+    def save_avatar(self, avatar_url, save_path="./avatar.jpg"):
+        ava = self.s.get(avatar_url)
+        with open(save_path, 'wb') as f:
+            f.write(ava.content)
+        return
+
+
     def logout(self, clear_save=False, path="./"):
         self.s.cookies.clear()
         if clear_save:
